@@ -11,17 +11,21 @@ def faceSmash():
                                      db=values.dbName, charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor, autocommit=True)
 
         with connection.cursor() as cursor:
+                #for GET requests
                 if request.method == "GET":
+                        #generating gender
                         gen = numpy.random.random()
                         if(gen<.5):
                                 gen = "MALE"
                         else :
                                 gen = "FEMALE"
+                        # generating the range of users to be considered
                         cursor.execute("select min(rating), max(rating) from "+values.faceSmash_tableName+" where gender = '"+gen+"';")
                         league = cursor.fetchone()
                         minVal = league["min(rating)"]
                         maxVal = league["max(rating)"]
                         league = numpy.random.randint(minVal,maxVal)
+                        #selecting users from the given range
                         cursor.execute("select * from "+values.faceSmash_tableName+" where rating >= "+str(league-values.faceSmash_league_diff)+" AND rating <" +str(league+values.faceSmash_league_diff)+" AND gender = '"+gen+"'"
                         "order by rand();")
                         ans = cursor.fetchall()
@@ -40,7 +44,9 @@ def faceSmash():
                                 "order by rand();")
                                 ans = cursor.fetchall()
                         return "[{image_url:"+ans[0]["imageID"]+"},{image_url:"+ans[1]["imageID"]+"}]"
-                else:
+                # for POST requests
+                elif request.method == "POST":
                         imgURL = request.args.get('image_url')
-                        cursor.execute("update "+values.faceSmash_tableName+" set rating = rating + 1 where imageID = '"+str(imgURL)+"';")
+                        # incrementing the rating of winning user
+                        cursor.execute("update "+values.faceSmash_tableName+" set rating = rating + "+str(values.faceSmash_ratingIncrease)+" where imageID = '"+str(imgURL)+"';")
                         return redirect(values.faceSmash_request)

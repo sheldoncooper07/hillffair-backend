@@ -10,6 +10,7 @@ dbName = "Hillffair2k19"
 
 faceSmash_request = "/facesmash"
 faceSmash_league_diff = 5
+faceSmash_ratingIncrease = 1
 faceSmash_tableName = "facesmashusers"
 
 # TODO add your own variables here instead of hardcoding them
