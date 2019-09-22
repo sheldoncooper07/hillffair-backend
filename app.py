@@ -1,5 +1,4 @@
 from flask import Flask
-import request
 from functools import wraps
 import json, time
 from datetime import datetime
@@ -29,12 +28,11 @@ connection = pymysql.connect(host='52.41.147.246',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
 
-@app.route('/')
+@app.route('/' , methods=['GET'])
 def hello():
-    if request.method=='GET':
+   
         return "hello"
-    else:
-        return "Hiiiii"
+   
 
 @app.route('/postwall/<rollno>/<imageurl>')
 # Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "likes": 2}]
