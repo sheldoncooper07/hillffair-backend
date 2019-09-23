@@ -34,6 +34,7 @@ def hello():
         return "hello"
    
 
+
 @app.route('/postwall/<rollno>/<imageurl>')
 # Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "likes": 2}]
 def postwall(rollno,imageurl):
@@ -44,6 +45,37 @@ def postwall(rollno,imageurl):
     cursor.execute(query);
     connection.commit();
     return {'status': 'success'}
+
+@app.route('/user',methods=['POST'])
+def user():
+    rollno,branch,mobile,referal_friend,name,gender,image_url=request.form.rollno,request.form.branch,request.form.mobile,request.form.referal_friend,request.form.name,request.form.gender,request.form.image_url
+    query=query = cursor.execute("INSERT into Users values(rollno,branch,mobile,referal_friend,name,gender,image_url")
+    connection.commit()
+    return {'status':'success'}
+@app.route('/user/<firebase_id>',methods=['GET'])
+def fid(firebase_id):
+     query=query = cursor.execute("SELECT * FROM Users WHERE firebase_id=firebase_id as user")
+     cursor.execute(query)
+     connection.commit()
+     return {user}
+
+@app.route('/feed',methods=['POST'])
+def feed():
+    feed,firebase_id=request.form.feed #todo
+    return {status_code:200}
+
+@app.route('/feed',methods=['GET'])
+def feedg():
+    query="SELECT * FROM Users WHERE firebase_id AS user"
+    #todo
+    
+    
+@app.route('/like',methods=['POST'])
+def like():
+    firebase_id=request.form.firebase_id
+    image_url=request.form.image_url
+    query="SELECT * from Users WHERE firebase_id=firebase_id AS user"
+    
 
 
 @app.route('/getwall/<int:start>/<user_id>')
