@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from functools import wraps
 import json, time
 from datetime import datetime
@@ -21,6 +21,7 @@ connection = pymysql.connect(host='sql12.freesqldatabase.com',
                                          db='sql12306111',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
+
 
 
 
@@ -75,19 +76,8 @@ def fid(firebase_id):
      #connection.commit()
      print(user)
      return user
-
-@app.route('/feed',methods=['POST'])
-def feed():
-    feed,firebase_id=request.form.feed #todo
-    return {status_code:200}
-
-@app.route('/feed',methods=['GET'])
-def feedg():
-    query="SELECT * FROM profile WHERE firebase_id AS user"
-    #todo
     
-    
-@app.route('/like',methods=['POST'])
+@app.route('/like',methods=['POST'])#FIX THIS
 def like():
     firebase_id=request.form.firebase_id
     image_url=request.form.image_url
@@ -96,7 +86,7 @@ def like():
     connection.commit()
     return {status_code:200}
     
-    
+   
 @app.route('/faceSmash',methods=['POST'])
 def faceSmashP():
     image_url=request.form.image_url
@@ -358,4 +348,4 @@ def postroulettecount(user_id):
 
 
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run(debug = True, host='0.0.0.0')
