@@ -179,9 +179,7 @@ def leaderboard():
     query="SELECT name,points as details from profile ORDER BY points DESC "
     cursor.execute(query)
     details=cursor.fetchall()
-<<<<<<< HEAD
-    return {details}
-=======
+
     return json.dumps(details)
 
     
@@ -205,10 +203,7 @@ def getwall(start,user_id):
     return json.dumps(result)
 
 
-<<<<<<< HEAD
 
-
-=======
 @app.route('/getlike/<int:image_id>')
 # Sample Response: {"likes": 2}
 def getlike(image_id):
@@ -255,7 +250,7 @@ def getpoint(rollno):
     query = cursor.execute("SELECT SUM(amount) AS points FROM score WHERE profile_id = '"+rollno+"' AND time>=(UNIX_timestamp(timestamp(current_date))+19800)")
     result = cursor.fetchone()
     return result
->>>>>>> hillapp/master
+
 
 @app.route('/getschedule')
 def getschedule():
@@ -287,12 +282,9 @@ def geteventlike(event_id):
     result = cursor.fetchone()
     return {"likes": result["COUNT(*)"]}
 
-<<<<<<< HEAD
 
-
-
-
-=======
+	
+	
 @app.route('/getclubs')
 def getclubs():
     query = cursor.execute("SELECT * FROM clubs")
@@ -310,7 +302,7 @@ def getsponsor():
     query = cursor.execute("SELECT * FROM sponsors")
     result = cursor.fetchall()
     return json.dumps(result)
->>>>>>> hillapp/master
+
 
 
 @app.route('/getquiz')
