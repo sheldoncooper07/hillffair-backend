@@ -24,6 +24,7 @@ cursor = connection.cursor()
 
 
 
+
 app.add_url_rule('/facesmash', 'faceSmash.faceSmash', faceSmash, methods=['GET', 'POST'])
 
 
