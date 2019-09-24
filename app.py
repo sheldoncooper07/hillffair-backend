@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from functools import wraps
 import json, time
 from datetime import datetime
@@ -45,7 +45,6 @@ def makeclubs():
         
 
 
-
 @app.route('/postwall/<rollno>/<imageurl>')
 # Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "likes": 2}]
 def postwall(rollno,imageurl):
@@ -75,19 +74,8 @@ def fid(firebase_id):
      #connection.commit()
      print(user)
      return user
-
-@app.route('/feed',methods=['POST'])
-def feed():
-    feed,firebase_id=request.form.feed #todo
-    return {status_code:200}
-
-@app.route('/feed',methods=['GET'])
-def feedg():
-    query="SELECT * FROM profile WHERE firebase_id AS user"
-    #todo
     
-    
-@app.route('/like',methods=['POST'])
+@app.route('/like',methods=['POST'])#FIX THIS
 def like():
     firebase_id=request.form.firebase_id
     image_url=request.form.image_url
@@ -96,7 +84,7 @@ def like():
     connection.commit()
     return {status_code:200}
     
-    
+   
 @app.route('/faceSmash',methods=['POST'])
 def faceSmashP():
     image_url=request.form.image_url
@@ -358,4 +346,4 @@ def postroulettecount(user_id):
 
 
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run(debug = True, host='0.0.0.0')
