@@ -31,7 +31,9 @@ CREATE TABLE `profile` (
   `name` varchar(100) NOT NULL,
   `points` int(11) NOT NULL,
   `gender` tinyint(1) NOT NULL,
-  `url` varchar(255) NOT NULL
+  `url` varchar(255) NOT NULL,
+  `rating` int(10) NOT NULL DEFAULT 0,
+  `referral_friend` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `quiz` (
