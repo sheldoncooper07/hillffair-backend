@@ -26,6 +26,8 @@ CREATE TABLE `likes` (
 CREATE TABLE `profile` (
   `firebase_id` varchar(100) NOT NULL,
   `rollno` varchar(20) DEFAULT NULL,
+  `branch` varchar(8) DEFAULT NULL,
+  `mobile` int(10) NOT NULL,
   `name` varchar(100) NOT NULL,
   `points` int(11) NOT NULL,
   `gender` tinyint(1) NOT NULL,
