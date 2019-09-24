@@ -3,21 +3,13 @@ import pymysql.cursors
 import numpy
 
 # add following code to use in app.py
-<<<<<<< HEAD
 # app.add_url_rule('/facesmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'])
-=======
-# app.add_url_rule('/facesmash', 'faceSmash', faceSmash, methods=['GET', 'POST'])
->>>>>>> upstream/master
 
 
 def faceSmash():
         faceSmash_tableName = "profile"
         faceSmash_league_diff = 5
         faceSmash_ratingIncrease = 1
-<<<<<<< HEAD
-=======
-        faceSmash_request = '/faceSmash'
->>>>>>> upstream/master
 
         connection = pymysql.connect(host="127.0.0.1", user="moulik", password="bigbang2",
                                      db="hillffair", charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor, autocommit=True)
