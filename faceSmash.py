@@ -52,7 +52,7 @@ def faceSmash(connection):
                         return "[{image_url:"+str(ans[0]["url"])+"},{image_url:"+str(ans[1]["url"])+"}]"
                 # for POST requests
                 elif request.method == "POST":
-                        imgURL = request.args.get('image_url')
+                        imgURL = request.form.get('image_url')
                         # incrementing the rating of winning user
                         cursor.execute("update "+str(faceSmash_tableName)+" set rating = rating + "+str(
                             faceSmash_ratingIncrease)+" where url = '"+str(imgURL)+"';")
