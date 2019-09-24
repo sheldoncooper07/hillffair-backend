@@ -29,22 +29,6 @@ connection = pymysql.connect(host='sql12.freesqldatabase.com',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
 
-@app.route('/makeuser' , methods=['GET'])
-def hello():
-        query = "INSERT into profile VALUES ('abcd',18155,'CSE',8580635669,'DEF',12,1,'google.com')"
-        cursor.execute(query)
-        connection.commit()
-        print("Done")
-        return "hello"
-@app.route('/makeclub',methods=['GET'])
-def makeclubs():
-    query = "INSERT into clubs VALUES (123,'App Team','google.com','Hiii This is app')"
-    cursor.execute(query)
-    connection.commit()
-    return "done"
-        
-   
-
 
 @app.route('/postwall/<rollno>/<imageurl>')
 # Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "likes": 2}]
@@ -71,19 +55,8 @@ def fid(firebase_id):
      #connection.commit()
      print(user)
      return user
-
-@app.route('/feed',methods=['POST'])
-def feed():
-    feed,firebase_id=request.form.feed #todo
-    return {status_code:200}
-
-@app.route('/feed',methods=['GET'])
-def feedg():
-    query="SELECT * FROM profile WHERE firebase_id AS user"
-    #todo
     
-    
-@app.route('/like',methods=['POST'])
+@app.route('/like',methods=['POST'])#FIX THIS
 def like():
     firebase_id=request.form.firebase_id
     image_url=request.form.image_url
@@ -92,7 +65,7 @@ def like():
     connection.commit()
     return {status_code:200}
     
-    
+   
 @app.route('/faceSmash',methods=['POST'])
 def faceSmashP():
     image_url=request.form.image_url
