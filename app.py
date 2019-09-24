@@ -10,13 +10,6 @@ import faceSmash as faceSmash
 
 global cursor
 
-# DECORATOR
-# declares json app.route given app.route string
-# return simple python option1bject in the function you write
-# example:
-# @app.route("/app.route_string")
-# def function():
-#     result = {...}
 
 
 
@@ -33,6 +26,8 @@ cursor = connection.cursor()
 
 app.add_url_rule('/facesmash', 'faceSmash.faceSmash', faceSmash, methods=['GET', 'POST'])
 
+
+
 @app.route('/makeuser' , methods=['GET'])
 def hello():
         query = "INSERT into profile VALUES ('abcd',18155,'CSE',8580635669,'DEF',12,1,'google.com')"
@@ -42,12 +37,13 @@ def hello():
         return "hello"
 @app.route('/makeclub',methods=['GET'])
 def makeclubs():
-    query = "INSERT into clubs VALUES (123,'App Team','google.com','Hiii This is app')"
+    query = "INSERT into clubs VALUES (123,'App Team','google.com','Hiii')"
     cursor.execute(query)
     connection.commit()
     return "done"
         
-   
+        
+
 
 
 @app.route('/postwall/<rollno>/<imageurl>')
@@ -61,12 +57,16 @@ def postwall(rollno,imageurl):
     connection.commit();
     return {'status': 'success'}
 
+
+
 @app.route('/user',methods=['POST'])
 def user():
     rollno,branch,mobile,referal_friend,name,gender,image_url=request.form.rollno,request.form.branch,request.form.mobile,request.form.referal_friend,request.form.name,request.form.gender,request.form.image_url
     query=query = cursor.execute("INSERT into profile values('"+rollno+"','"+branch+"','"+mobile+"','"+referal_friend+"',+name,gender,image_url")
     connection.commit()
     return {'status':'success'}
+    
+ #tested
 @app.route('/user/<firebase_id>',methods=['GET'])
 def fid(firebase_id):
      query="SELECT * FROM profile AS user HAVING firebase_id='"+firebase_id+"'"
@@ -114,14 +114,23 @@ def quiz():
     #random on client side
     
     
-@app.route('/profile',methods=['POST'])
-def profile():
-    firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.forms.firebase_id,request.form.rollno,request.form.branch,request.form.mobile,request.form.referl_friend,request.form.name,request.form.gender,request.form.image_url
-    query="INSERT INTO profile VALUES(firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url"
-    cursor.execute(query)
-    connection.commit()
-    return {status_code:200}
-    
+#@app.route('/profile',methods=['POST'])
+#def profile():
+#    firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.forms.firebase_id,request.form.rollno,request.form.branch,request.form.mobile,request.form.referl_friend,request.form.name,request.form.gender,request.form.image_url
+#    query="INSERT INTO profile VALUES(firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url"
+#    cursor.execute(query)
+#    connection.commit()
+#    return {status_code:200}
+   
+#@app.route('/profile',methods=['GET'])
+#def profile():
+#   firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.forms.firebase_id,request.form.rollno,request.form.branch,request.form.mobile,request.form.referl_friend,request.form.name,request.form.gender,request.form.image_url
+#   query=" profile VALUES(firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url"
+#    cursor.execute(query)
+#    connection.commit()
+#   return {status_code:200}   
+
+
 
 @app.route('/club_info/<club_name>' ,methods=['GET'])
 def club():
@@ -154,7 +163,16 @@ def leaderboard():
     details=connection.fetchall()
     return {details}
     
+    
+@app.route('/rewards',methods=['POST'])
+def rewards():
+    firebase_id=request.form.firebase_id
+    candies=request.form.sub_candies
+    query="UPDATE profile SET points=points-'"+candies+"' WHERE firebase_id='"+firebase_id+"'"
+    
+    
     #---------------------------------------------------------------------------
+    
 
 @app.route('/getwall/<int:start>/<user_id>')
 # Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "likes": 2}]
@@ -164,51 +182,8 @@ def getwall(start,user_id):
     return result
 
 
-@app.route('/getlike/<int:image_id>')
-# Sample Response: {"likes": 2}
-def getlike(image_id):
-    query = cursor.execute("SELECT COUNT(*) AS likes FROM likes WHERE post_id="+str(image_id))
-    result = cursor.fetchone()
-    return result
 
 
-@app.route('/postlike/<int:image_id>/<user_id>/<int:action>')
-def postlike(image_id, user_id,action):
-        if action==1:
-            query = cursor.execute("INSERT INTO likes VALUES(NULL, '"+user_id+"', "+str(image_id)+")")
-            if query:
-                return {'status': 'success'}
-            else:
-                return {'status': 'fail'}
-        else:
-            query = cursor.execute("DELETE from likes where profile_id = '"+user_id+"' AND post_id = '"+str(image_id)+"'")
-            if query:
-                return {'status': 'success'}
-            else:
-                return {'status': 'fail'}
-
-@app.route('/getleaderboard')
-# Sample Response: [{"id": "17mi561", "name": "Daniyaal Khan", "score": 60.0}, {"id": "17mi560", "name": "Check", "score": 10.0}]
-def getleaderboard():
-    #print("SELECT p.id, p.name, p.image_url, ((SELECT SUM(amount) FROM score WHERE profile_id=p.id AND time>=(UNIX_timestamp(timestamp(current_date))+19800)+(SELECT SUM(referal_score) FROM score WHERE profile_id=p.id)) as score FROM profile AS p ORDER BY score DESC LIMIT "+str(startfrom)+", "+str(startfrom+10))
-    query = cursor.execute("SELECT p.id, p.name, p.image_url, ((SELECT SUM(amount) FROM score WHERE profile_id=p.id AND time>=(UNIX_timestamp(timestamp(current_date))+19800) AND referal_score=0)) as score FROM profile AS p ORDER BY score DESC")
-    result = cursor.fetchall()
-    return result
-
-
-@app.route('/postpoint/<rollno>/<int:points>')
-def postpoint(rollno, points):
-    query = cursor.execute("INSERT INTO score VALUES(NULL, '"+rollno+"', "+str(points)+", "+str(time.time()+19800)+",0.0)")
-    if query:
-        return {'status': 'success'}
-    else:
-        return {'status': 'fail'}
-
-@app.route('/getpoint/<rollno>')
-def getpoint(rollno):
-    query = cursor.execute("SELECT SUM(amount) AS points FROM score WHERE profile_id = '"+rollno+"' AND time>=(UNIX_timestamp(timestamp(current_date))+19800)")
-    result = cursor.fetchone()
-    return result
 
 @app.route('/getschedule')
 def getschedule():
@@ -239,23 +214,10 @@ def geteventlike(event_id):
     result = cursor.fetchone()
     return {'likes': result["COUNT(*)"]}
 
-@app.route('/getclubs')
-def getclubs():
-    query = cursor.execute("SELECT * FROM clubs")
-    result = cursor.fetchall()
-    return result
 
-@app.route('/getcoreteam')
-def getcoreteam():
-    query = cursor.execute("SELECT * FROM coreteam")
-    result = cursor.fetchall()
-    return result
 
-@app.route('/getsponsor')
-def getsponsor():
-    query = cursor.execute("SELECT * FROM sponsors")
-    result = cursor.fetchall()
-    return result
+
+
 
 winarray = list(range(1,91))
 random.shuffle(winarray)
