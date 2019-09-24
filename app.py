@@ -85,7 +85,7 @@ def quiz():
     
 @app.route('/profile',methods=['POST'])
 def profile():
-    firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.forms.firebase_id,request.form.rollno,request.form.branch,request.form.mobile,request.form.referl_friend,request.form.name,request.form.gender,request.form.image_url
+    firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.form.firebase_id,request.form.rollno,request.form.branch,request.form.mobile,request.form.referl_friend,request.form.name,request.form.gender,request.form.image_url
     query="INSERT INTO profile VALUES(firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url"
     cursor.execute(query)
     connection.commit()
@@ -113,8 +113,9 @@ def core():
 def sponsors():
     query="SELECT * from sponsors as sponsor"
     cursor.execute(query)
-    sponsor=connection.fetchall()
-    return {sponsor}
+    sponsor=cursor.fetchall()
+    print(len(sponsor))
+    return sponsor[0]
     
 @app.route('/leaderboard')
 def leaderboard():
