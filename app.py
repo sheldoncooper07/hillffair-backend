@@ -42,7 +42,7 @@ def makeclubs():
     connection.commit()
     return "done"
         
-        
+@app.route        
 
 
 @app.route('/postwall/<rollno>/<imageurl>')
@@ -54,16 +54,16 @@ def postwall(rollno,imageurl):
     query = cursor.execute("INSERT into Wall values(NULL,'"+rollno+"','"+imageurl+"', "+str(int(time.time()+19800))+")")
     cursor.execute(query);
     connection.commit();
-    return {'status': 'success'}
+    return {'status': 'success',"status_code":200}
 
 
 
 @app.route('/user',methods=['POST'])
 def user():
-    rollno,branch,mobile,referal_friend,name,gender,image_url=request.form.rollno,request.form.branch,request.form.mobile,request.form.referal_friend,request.form.name,request.form.gender,request.form.image_url
-    query=query = cursor.execute("INSERT into profile values('"+rollno+"','"+branch+"','"+mobile+"','"+referal_friend+"',+name,gender,image_url")
+    firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.form.rollno,request.form.branch,request.form.mobile,request.form.referal_friend,request.form.name,request.form.gender,request.form.image_url
+    query=query = cursor.execute("INSERT into profile values('"+firebase_id+"''"+rollno+"','"+branch+"','"+mobile+"','"+referal_friend+"',+name,gender,image_url")
     connection.commit()
-    return {'status':'success'}
+    return {'status':'success',"status_code":200}
     
  #tested
 @app.route('/user/<firebase_id>',methods=['GET'])
@@ -85,21 +85,16 @@ def like():
     return {status_code:200}
     
    
-@app.route('/faceSmash',methods=['POST'])
-def faceSmashP():
-    image_url=request.form.image_url
-    firebase_id=request.form.firebase_id #user or firebase id??? todo
-    #todo
 
 
 @app.route('/quiz/questions',methods=['POST'])
 def quiz():
     category=request.form.category
-    query="SELECT * FROM quiz AS ques WHERE category='"+category+"'"
+    query="SELECT id,ques,option1,option2,option3,option4 FROM quiz ORDER BY RAND() LIMIT 10 AS ques WHERE category='"+category+"'"
     cursor.execute(query)
-    questions=connection.fetchall();
+    questions=cursor.fetchall();
     return questions
-    #random on client side
+    
     
     
 #@app.route('/profile',methods=['POST'])
@@ -124,14 +119,14 @@ def quiz():
 def club():
     query="SELECT * from club AS details where name='"+club_name>+"'"
     cursor.execute(query)
-    details=connection.fetchone()
+    details=cursor.fetchone()
     return {details}
     
 @app.route('/core_team/<core_name>' ,methods=['GET'])  
 def core():
     query="SELECT * from coreteamcas core_detail where name='"+core_name+"'"
     cursor.execute(query)
-    core_details=connection.fetchone()
+    core_details=cursor.fetchone()
     return {core_detail}
     
     
@@ -141,14 +136,14 @@ def core():
 def sponsors():
     query="SELECT * from sponsors as sponsor"
     cursor.execute(query)
-    sponsor=connection.fetchall()
+    sponsor=cursor.fetchall()
     return {sponsor}
     
 @app.route('/leaderboard')
 def leaderboard():
     query="SELECT name,points as details from profile "
     cursor.execute(query)
-    details=connection.fetchall()
+    details=cursor.fetchall()
     return {details}
     
     
@@ -157,6 +152,7 @@ def rewards():
     firebase_id=request.form.firebase_id
     candies=request.form.sub_candies
     query="UPDATE profile SET points=points-'"+candies+"' WHERE firebase_id='"+firebase_id+"'"
+	return {"status_code":200}# not in docs
     
     
     #---------------------------------------------------------------------------
