@@ -43,8 +43,33 @@ def makeclubs():
     connection.commit()
     return "done"
         
-@app.route        
-
+		
+@app.route('/feed',methos=['POST'])
+def feedp():
+	firebase_id=request.form.firebase_id
+	image_url=request.form.image_url
+	#what id?
+	query="INSERT INTO wall VALUES (NULL,'"+firebase_id+"',0'"+image_url+"'"
+	cursor.execute(query)
+	connection.commit();
+	return {"status_code":200}
+	
+@app.route('/quiz/answers',methods=['POST'])
+def quiz_answers():
+	points=0
+	firebase_id=request.form.firebase_id
+	answers=request.form.answers
+	#answers is object array according to documentation
+	#for loop for each answer
+	for in range(0,answers.length):
+		cursor.execute("SELECT answer as answer FROM quiz WHERE id='"+answers[i].id"'"
+		answer=cursor.fetchone();
+		if answers[i].answer==answer:
+			points=points+1
+	cursor.execute("UPDATE profile SET points=points+'"+points+"' WHERE id='"+firebase_id+"'"
+	return {"score":points}
+			
+	
 
 @app.route('/postwall/<rollno>/<imageurl>')
 # Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "likes": 2}]
@@ -142,7 +167,7 @@ def sponsors():
     
 @app.route('/leaderboard')
 def leaderboard():
-    query="SELECT name,points as details from profile "
+    query="SELECT name,points as details from profile ORDER BY points DESC "
     cursor.execute(query)
     details=cursor.fetchall()
     return {details}
