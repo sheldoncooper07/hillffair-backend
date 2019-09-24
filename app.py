@@ -6,7 +6,7 @@ import random
 import pymysql.cursors
 import base64
 app = Flask(__name__)
-
+import faceSmash as faceSmash
 
 global cursor
 
@@ -28,6 +28,10 @@ connection = pymysql.connect(host='sql12.freesqldatabase.com',
                                          db='sql12306111',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
+
+
+
+app.add_url_rule('/facesmash', 'faceSmash.faceSmash', faceSmash, methods=['GET', 'POST'])
 
 @app.route('/makeuser' , methods=['GET'])
 def hello():
