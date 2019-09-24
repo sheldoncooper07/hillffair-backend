@@ -5,6 +5,7 @@ from datetime import datetime
 import random
 import pymysql.cursors
 import base64
+import faceSmash
 app = Flask(__name__)
 import faceSmash as faceSmash
 
@@ -15,7 +16,6 @@ global cursor
 
 
 connection = pymysql.connect(host='sql12.freesqldatabase.com',
-                                       # port=3306,
                                          user='sql12306111',
                                          password='CABFDtx5cP',
                                          db='sql12306111',
@@ -84,76 +84,84 @@ def postwall(rollno,imageurl):
 
 
 
+
 @app.route('/user',methods=['POST'])
 def user():
     firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.form.rollno,request.form.branch,request.form.mobile,request.form.referal_friend,request.form.name,request.form.gender,request.form.image_url
     query=query = cursor.execute("INSERT into profile values('"+firebase_id+"''"+rollno+"','"+branch+"','"+mobile+"','"+referal_friend+"',+name,gender,image_url")
     connection.commit()
     return {'status':'success',"status_code":200}
-    
+ 
  #tested
 @app.route('/user/<firebase_id>',methods=['GET'])
 def fid(firebase_id):
      query="SELECT * FROM profile AS user HAVING firebase_id='"+firebase_id+"'"
      cursor.execute(query)
      user=cursor.fetchall()
-     #connection.commit()
+    #  connection.commit()
      print(user)
-     return user
+
+     return json.dumps(user)
+
+@app.route('/feed',methods=['POST'])
+def feed():
+    feed,firebase_id=request.form.feed #todo
+    return {"status_code":200}
+
+@app.route('/feed',methods=['GET'])
+def feedg():
+    query="SELECT * FROM profile WHERE firebase_id AS user"
+    #todo
     
 @app.route('/like',methods=['POST'])#FIX THIS
 def like():
     firebase_id=request.form.firebase_id
-    image_url=request.form.image_url
+    image_url=request.form.image_url        #use?
     query="UPDATE wall SET likes=likes+1 WHERE firebase_id='"+firebase_id+"'"
     cursor.execute(query)
     connection.commit()
-    return {status_code:200}
+    return {"status_code":200}
     
-   
 
+
+    
+app.add_url_rule('/faceSmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'], defaults = {"connection":connection})
 
 @app.route('/quiz/questions',methods=['POST'])
 def quiz():
     category=request.form.category
     query="SELECT id,ques,option1,option2,option3,option4 FROM quiz ORDER BY RAND() LIMIT 10 AS ques WHERE category='"+category+"'"
     cursor.execute(query)
-    questions=cursor.fetchall();
-    return questions
+    questions=cursor.fetchall()
+    return json.dumps(questions)
+    #random on client side
     
     
-    
-#@app.route('/profile',methods=['POST'])
-#def profile():
-#    firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.forms.firebase_id,request.form.rollno,request.form.branch,request.form.mobile,request.form.referl_friend,request.form.name,request.form.gender,request.form.image_url
-#    query="INSERT INTO profile VALUES(firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url"
-#    cursor.execute(query)
-#    connection.commit()
-#    return {status_code:200}
-   
-#@app.route('/profile',methods=['GET'])
-#def profile():
-#   firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.forms.firebase_id,request.form.rollno,request.form.branch,request.form.mobile,request.form.referl_friend,request.form.name,request.form.gender,request.form.image_url
-#   query=" profile VALUES(firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url"
-#    cursor.execute(query)
-#    connection.commit()
-#   return {status_code:200}   
+@app.route('/profile',methods=['POST'])
+def profile():
+    firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.forms.firebase_id,request.form.rollno,request.form.branch,request.form.mobile,request.form.referl_friend,request.form.name,request.form.gender,request.form.image_url
+    query="INSERT INTO profile VALUES(firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url"
+    cursor.execute(query)
+    connection.commit()
+    return {"status_code":200}
+
 
 
 
 @app.route('/club_info/<club_name>' ,methods=['GET'])
-def club():
-    query="SELECT * from club AS details where name='"+club_name>+"'"
+def club(club_name):
+    query="SELECT * from clubs AS details where name='"+club_name+"'"
     cursor.execute(query)
     details=cursor.fetchone()
-    return {details}
+    return details
     
 @app.route('/core_team/<core_name>' ,methods=['GET'])  
-def core():
+def core(core_name):
     query="SELECT * from coreteamcas core_detail where name='"+core_name+"'"
     cursor.execute(query)
     core_details=cursor.fetchone()
-    return {core_detail}
+    return core_details
+
     
     
     
@@ -163,14 +171,19 @@ def sponsors():
     query="SELECT * from sponsors as sponsor"
     cursor.execute(query)
     sponsor=cursor.fetchall()
-    return {sponsor}
+    return json.dumps(sponsor)
+
     
 @app.route('/leaderboard')
 def leaderboard():
     query="SELECT name,points as details from profile ORDER BY points DESC "
     cursor.execute(query)
     details=cursor.fetchall()
+<<<<<<< HEAD
     return {details}
+=======
+    return json.dumps(details)
+
     
     
 @app.route('/rewards',methods=['POST'])
@@ -189,11 +202,60 @@ def rewards():
 def getwall(start,user_id):
     query = cursor.execute("SELECT w.id as id, p.name as name, p.id as rollno, (SELECT COUNT(*) FROM likes WHERE post_id=w.id) AS likes, (Select count(*) from likes where post_id=w.id AND profile_id='"+user_id+"') as liked, w.image_url, p.image_url AS profile_pic  FROM wall as w, profile as p WHERE p.id=w.profile_id ORDER BY w.time DESC")
     result = cursor.fetchall()
+    return json.dumps(result)
+
+
+<<<<<<< HEAD
+
+
+=======
+@app.route('/getlike/<int:image_id>')
+# Sample Response: {"likes": 2}
+def getlike(image_id):
+    query = cursor.execute("SELECT COUNT(*) AS likes FROM likes WHERE post_id="+str(image_id))
+    result = cursor.fetchone()
     return result
 
 
+@app.route('/postlike/<int:image_id>/<user_id>/<int:action>')
+def postlike(image_id, user_id,action):
+        if action==1:
+            query = cursor.execute("INSERT INTO likes VALUES(NULL, '"+user_id+"', "+str(image_id)+")")
+            if query:
+                return {"status": "success"}
+            else:
+                return {"status": "fail"}
+        else:
+            query = cursor.execute("DELETE from likes where profile_id = '"+user_id+"' AND post_id = '"+str(image_id)+"'")
+            if query:
+                return {"status": "success"}
+            else:
+                return {"status": "fail"}
+
+@app.route('/getleaderboard')
+# Sample Response: [{"id": "17mi561", "name": "Daniyaal Khan", "score": 60.0}, {"id": "17mi560", "name": "Check", "score": 10.0}]
+def getleaderboard():
+    #print("SELECT p.id, p.name, p.image_url, ((SELECT SUM(amount) FROM score WHERE profile_id=p.id AND time>=(UNIX_timestamp(timestamp(current_date))+19800)+(SELECT SUM(referal_score) FROM score WHERE profile_id=p.id)) as score FROM profile AS p ORDER BY score DESC LIMIT "+str(startfrom)+", "+str(startfrom+10))
+    query = cursor.execute("SELECT p.id, p.name, p.image_url, ((SELECT SUM(amount) FROM score WHERE profile_id=p.id AND time>=(UNIX_timestamp(timestamp(current_date))+19800) AND referal_score=0)) as score FROM profile AS p ORDER BY score DESC")
+    result = cursor.fetchall()
+    return json.dumps(result)
 
 
+@app.route('/postpoint/<rollno>/<int:points>')
+def postpoint(rollno, points):
+    query = cursor.execute("INSERT INTO score VALUES(NULL, '"+rollno+"', "+str(points)+", "+str(time.time()+19800)+",0.0)")
+    connection.commit()
+    if query:
+        return {"status": "success"}
+    else:
+        return {"status": "fail"}
+
+@app.route('/getpoint/<rollno>')
+def getpoint(rollno):
+    query = cursor.execute("SELECT SUM(amount) AS points FROM score WHERE profile_id = '"+rollno+"' AND time>=(UNIX_timestamp(timestamp(current_date))+19800)")
+    result = cursor.fetchone()
+    return result
+>>>>>>> hillapp/master
 
 @app.route('/getschedule')
 def getschedule():
@@ -201,50 +263,55 @@ def getschedule():
     result = cursor.fetchall()
     #for x in result:
         #x["event_time"] = x["event_time"].timestamp()
-    return result
+    return json.dumps(result)
 
 @app.route('/posteventlike/<user_id>/<event_id>')
 def posteventlike(user_id, event_id):
     userCheck = cursor.execute("SELECT * from profile where id = %s", (user_id))
     if userCheck == 0:
-        return {'status': 'No such user'}
+        return {"status": "No such user"}
     eventCheck = cursor.execute("SELECT * from events where event_id = %s", (event_id))
     if eventCheck == 0:
-        return {'status': 'No such event'}
+        return {"status": "No such event"}
     query = cursor.execute("SELECT * from event_likes where user_id = %s AND event_id = %s", (user_id, event_id))
     if query == 0:
         cursor.execute("INSERT INTO event_likes VALUES (NULL, %s, %s)", (event_id, user_id))
-        return {'status': 'success'}
+        connection.commit()
+        return {"status": "success"}
     else:
-        return {'status': 'Already Liked'}
+        return {"status": "Already Liked"}
 
 @app.route('/geteventlike/<event_id>')
 def geteventlike(event_id):
     query = cursor.execute("SELECT COUNT(*) from event_likes where event_id = %s", event_id)
     result = cursor.fetchone()
-    return {'likes': result["COUNT(*)"]}
+    return {"likes": result["COUNT(*)"]}
+
+<<<<<<< HEAD
 
 
 
 
+=======
+@app.route('/getclubs')
+def getclubs():
+    query = cursor.execute("SELECT * FROM clubs")
+    result = cursor.fetchall()
+    return json.dumps(result)
 
+@app.route('/getcoreteam')
+def getcoreteam():
+    query = cursor.execute("SELECT * FROM coreteam")
+    result = cursor.fetchall()
+    return json.dumps(result)
 
-winarray = list(range(1,91))
-random.shuffle(winarray)
+@app.route('/getsponsor')
+def getsponsor():
+    query = cursor.execute("SELECT * FROM sponsors")
+    result = cursor.fetchall()
+    return json.dumps(result)
+>>>>>>> hillapp/master
 
-@app.route('/gettambolanumber')
-def gettambolanumber():
-    time = int(datetime(2018, datetime.now().month, datetime.now().day, 22, 0).timestamp())
-    current = int(datetime.now().timestamp())
-    if(0 <= current - time <= 3600):
-        i = ((current - time) // 15) % 90
-        return {'number' : winarray[i]}
-    else:
-        return {'status': 'Unavailable'}
-
-@app.route('/posttambolaresult')
-def posttambolaresult():
-    return 'Hello, World!'
 
 @app.route('/getquiz')
 def getquiz():
@@ -256,7 +323,7 @@ def getquiz():
     result = cursor.fetchall()
     # choose random 10 from all these
     random.shuffle(result)
-    return {'questions':result[:10]}
+    return {"questions":json.dumps(result[:10])}
 
 @app.route('/postprofile/<name>/<rollno>/<phone_no>/<referal>/<imageurl>')
 def postprofile(name,rollno,phone_no,referal,imageurl):
@@ -271,12 +338,16 @@ def postprofile(name,rollno,phone_no,referal,imageurl):
         # print("INSERT into profile VALUES('"+rollno+"',"+str(phone_no)+",'"+name+"','"+str(imageurl)+"','"+referal+"')")
         query = cursor.execute("INSERT into profile VALUES('"+rollno+"',"+str(phone_no)+",'"+name+"','"+imageurl+"','"+referal+"')")
         # print(query)
+        connection.commit()
+        return {'status': 'success'}
+
     except:
         # print("UPDATE profile set name = '"+name+"',phone = "+str(phone_no)+",image_url = '"+imageurl+"' where id='"+rollno+"'");
         query = cursor.execute("UPDATE profile set name = '"+name+"',phone = "+str(phone_no)+",image_url = '"+str(imageurl)+"' where id='"+rollno+"'")
         print(query)
-
+        connection.commit()
         return {'status': 'success'}
+
 
     else:
         #print("INSERT INTO score VALUES(NULL, '"+rollno+"',10,"+str(1537940897)+",1),(NULL, '"+referal+"',10,"+str(1537940897)+",1)")
