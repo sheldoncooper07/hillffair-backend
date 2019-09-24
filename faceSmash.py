@@ -3,14 +3,13 @@ import pymysql.cursors
 import numpy
 
 # add following code to use in app.py
-# app.add_url_rule('/facesmash', 'faceSmash', faceSmash, methods=['GET', 'POST'])
+# app.add_url_rule('/facesmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'])
 
 
 def faceSmash():
         faceSmash_tableName = "profile"
         faceSmash_league_diff = 5
         faceSmash_ratingIncrease = 1
-        faceSmash_request = '/faceSmash'
 
         connection = pymysql.connect(host="127.0.0.1", user="moulik", password="bigbang2",
                                      db="hillffair", charset='utf8mb4', cursorclass=pymysql.cursors.DictCursor, autocommit=True)
@@ -59,4 +58,4 @@ def faceSmash():
                         # incrementing the rating of winning user
                         cursor.execute("update "+str(faceSmash_tableName)+" set rating = rating + "+str(
                             faceSmash_ratingIncrease)+" where url = '"+str(imgURL)+"';")
-                        return redirect(faceSmash_request)
+                        return "{status_code:200}"
