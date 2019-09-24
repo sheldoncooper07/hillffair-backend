@@ -29,22 +29,6 @@ connection = pymysql.connect(host='127.0.0.1',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
 
-@app.route('/makeuser' , methods=['GET'])
-def hello():
-        query = "INSERT into profile VALUES ('abcd',18155,'CSE',8580635669,'DEF',12,1,'google.com')"
-        cursor.execute(query)
-        connection.commit()
-        print("Done")
-        return "hello"
-@app.route('/makeclub',methods=['GET'])
-def makeclubs():
-    query = "INSERT into clubs VALUES (123,'App Team','google.com','Hiii This is app')"
-    cursor.execute(query)
-    connection.commit()
-    return "done"
-        
-   
-
 
 @app.route('/postwall/<rollno>/<imageurl>')
 # Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "likes": 2}]
@@ -70,6 +54,7 @@ def fid(firebase_id):
      user=cursor.fetchall()
     #  connection.commit()
      print(user)
+
      return json.dumps(user)
 
 @app.route('/feed',methods=['POST'])
@@ -82,8 +67,7 @@ def feedg():
     query="SELECT * FROM profile WHERE firebase_id AS user"
     #todo
     
-    
-@app.route('/like',methods=['POST'])
+@app.route('/like',methods=['POST'])#FIX THIS
 def like():
     firebase_id=request.form.firebase_id
     image_url=request.form.image_url        #use?
@@ -92,9 +76,9 @@ def like():
     connection.commit()
     return {"status_code":200}
     
-    
-app.add_url_rule('/facesmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'], defaults = {"connection":connection})
 
+    
+app.add_url_rule('/faceSmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'], defaults = {"connection":connection})
 
 @app.route('/quiz/questions',methods=['POST'])
 def quiz():
@@ -378,4 +362,4 @@ def postroulettecount(user_id):
 
 
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run(debug = True, host='0.0.0.0')
