@@ -23,7 +23,7 @@ connection = pymysql.connect(host='sql12.freesqldatabase.com',
 cursor = connection.cursor()
 
 @app.route('/postwall/<rollno>/<imageurl>')
-# Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "likes": 2}]
+# Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "s": 2}]
 def postwall(rollno,imageurl):
 
     imageurl=imageurl
@@ -78,23 +78,28 @@ def getUser():
     return data
 
 
-@app.route('/feed',methods=['POST'])
-def feed():
-    feed,firebase_id=request.form.feed #todo
-    return {"status_code":200}
 
-@app.route('/feed',methods=['GET'])
-def feedg():
-    query="SELECT * FROM profile WHERE firebase_id AS user"
-    #todo
-    
-@app.route('/like',methods=['POST'])#FIX THIS
+	
+
+
+
+
+
+@app.route('/like',methods=['POST'])
 def like():
     firebase_id=request.form.firebase_id
     image_url=request.form.image_url        #use?
     query="UPDATE wall SET likes=likes+1 WHERE firebase_id='"+firebase_id+"'"
     cursor.execute(query)
     connection.commit()
+
+    query="SELECT firebase_id as fid FROM wall WHERE url='"+image_url+"'"
+    cursor.execute(query)
+    fid=cursor.fetchone()
+    q="UPDATE profile SET points=points+1 WHERE firebase_id='"+fid+"'"
+    cursor.execute(q)
+    connection.commit()
+    
     return {"status_code":200}
     
     
@@ -142,6 +147,41 @@ def leaderboard():
 
     return json.dumps(details)
 
+
+
+@app.route('/feed',methods=['POST'])
+def feed(firebase_id,imageurl):
+	firebase_id=request.form.firebase_id
+	url=request.form.image_url
+	query="INSERT INTO wall VALUES(id,'"+firebase_id+"',0,'"+imageurl+"')"
+	cursor.execute(query)
+	connection.commit()
+	return {status_code:200}
+   
+
+
+
+
+@app.route('/feed/<page_index>/<firebase_id>',methods=['GET'])
+def feedg():
+	query="SELECT * FROM wall as photos ORDER BY id LIMIT (page_index-1)*10+1,(page_index*10) DESC"
+	ret_arr=[]
+	cursor.execute(query)
+	photos=cursor.fetchall()
+	for i in range(0,photos.length()):
+		cursor.execute("SELECT * FROM likes as like WHERE firebase_id='"+firebase_id+"' AND id='"+photos[i].id+"'") 
+		like=cursor.fetchone()
+		if(like):
+			q="COUNT * FROM likes where post='"+photots[i].id+"'"
+			cursor.execute(q)
+			count=cursor.fetchall()
+			ret_arr.append({"image_url":photos[i].url,"likes":count,"liked":1})
+		else:
+			q="COUNT * FROM likes where post='"+photots[i].id+"'"
+			cursor.execute(q)
+			count=cursor.fetchall()
+			ret_arr.append({"image_url":photos[i].url,"likes":count,"liked":0})
+
     
     
 @app.route('/rewards',methods=['POST'])
@@ -149,7 +189,7 @@ def rewards():
     firebase_id=request.form.firebase_id
     candies=request.form.sub_candies
     query="UPDATE profile SET points=points-'"+candies+"' WHERE firebase_id='"+firebase_id+"'"
-	return {"status_code":200}# not in docs
+    return {"status_code":200}# not in docs
     
     
 @app.route('/rewards',methods=['POST'])
