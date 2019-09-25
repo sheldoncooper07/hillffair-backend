@@ -27,7 +27,7 @@ CREATE TABLE `profile` (
   `firebase_id` varchar(100) NOT NULL,
   `rollno` varchar(20) DEFAULT NULL,
   `branch` varchar(8) DEFAULT NULL,
-  `mobile` int(10) NOT NULL,
+  `mobile` varchar(10) NOT NULL,
   `name` varchar(100) NOT NULL,
   `points` int(11) NOT NULL,
   `gender` tinyint(1) NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE `sponsors` (
 
 CREATE TABLE `wall` (
   `id` int(11) NOT NULL,
-  `firebase_id` int(100) NOT NULL,
+  `firebase_id` varchar(100) NOT NULL,
   `likes` int(100) DEFAULT NULL,
   `url` varchar(200) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
