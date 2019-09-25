@@ -15,10 +15,10 @@ global cursor
 
 
 
-connection = pymysql.connect(host='sql12.freesqldatabase.com',
-                                         user='sql12306111',
-                                         password='CABFDtx5cP',
-                                         db='sql12306111',
+connection = pymysql.connect(host='localhost',
+                                         user='hillffair',
+                                         password='1qaz2wsx',
+                                         db='hillffair',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
 
@@ -84,9 +84,9 @@ def getUser():
     cursor.execute("select firebase_id as Firebaseid, rollno as 'roll number', branch, mobile, referral_friend,name,gender,url as image_url from profile where firebase_id = '{fbID}'".format(fbID=fbID))
     data = cursor.fetchone()
     if(data):
-    	return data
+        return data
     else:
-	return {"status":"User not found"}
+        return {"status":"User not found"}
 
 
 
@@ -118,8 +118,8 @@ app.add_url_rule('/faceSmash', 'faceSmash.faceSmash', faceSmash.faceSmash, metho
 
 @app.route('/quiz/questions',methods=['POST'])
 def quiz():
-    category=request.form.category
-    query="SELECT id,ques,option1,option2,option3,option4 FROM quiz ORDER BY RAND() LIMIT 10 AS ques WHERE category='"+category+"'"
+    category=request.form.get('category')
+    query="SELECT id,ques,option1,option2,option3,option4 FROM quiz WHERE category={} ORDER BY RAND() LIMIT 10".format(category)
     cursor.execute(query)
     questions=cursor.fetchall()
     return json.dumps(questions)
