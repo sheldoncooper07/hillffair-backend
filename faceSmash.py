@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, l
 import pymysql.cursors
 import numpy
 
+
 # add following code to use in app.py
 # app.add_url_rule('/facesmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'], defaults = {"connection":connection})
 
