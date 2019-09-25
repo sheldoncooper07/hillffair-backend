@@ -22,6 +22,14 @@ connection = pymysql.connect(host='sql12.freesqldatabase.com',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
 
+
+@app.route('/makesponsors',methods=['POST'])
+def make():
+	query="INSERT INTO sponsor VALUES ('app team','google.com','info')"
+	cursor.execute(query)
+	connection.commit()
+	return {"status_code":200}
+
 @app.route('/postwall/<rollno>/<imageurl>')
 # Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "s": 2}]
 def postwall(rollno,imageurl):
@@ -75,7 +83,10 @@ def getUser():
     fbID = request.form.get('firebaseid')
     cursor.execute("select firebase_id as Firebaseid, rollno as 'roll number', branch, mobile, referral_friend,name,gender,url as image_url from profile where firebase_id = '{fbID}'".format(fbID=fbID))
     data = cursor.fetchone()
-    return data
+    if(data):
+    	return data
+    else:
+	return {"status":"User not found"}
 
 
 
