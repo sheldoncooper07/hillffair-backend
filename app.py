@@ -192,14 +192,6 @@ def rewards():
     return {"status_code":200}# not in docs
     
     
-@app.route('/rewards',methods=['POST'])
-def rewards():
-    firebase_id=request.form.get('firebase_id')
-    candies=request.form['sub_candies']
-    query="UPDATE profile SET points=points-'"+candies+"' WHERE firebase_id='"+firebase_id+"'"
-    cursor.execute(query)
-    connection.commit()
-    return {"status_code":200}# not in docs
 
     #---------------------------------------------------------------------------
     
