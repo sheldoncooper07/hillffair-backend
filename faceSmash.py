@@ -56,6 +56,7 @@ def faceSmash(connection):
                         # incrementing the rating of winning user
                         cursor.execute("update "+str(faceSmash_tableName)+" set rating = rating + "+str(
                             faceSmash_ratingIncrease)+" where url = '"+str(imgURL)+"';")
+                        connection.commit()
                         if cursor.rowcount == 0:
                                 return {'status':'fail'}
                         return {'status':'success'}
