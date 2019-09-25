@@ -15,12 +15,20 @@ global cursor
 
 
 
-connection = pymysql.connect(host='sql12.freesqldatabase.com',
-                                         user='sql12306111',
-                                         password='CABFDtx5cP',
-                                         db='sql12306111',
+connection = pymysql.connect(host='localhost',
+                                         user='hillffair',
+                                         password='1qaz2wsx',
+                                         db='hillffair',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
+
+
+@app.route('/makesponsors',methods=['POST'])
+def make():
+	query="INSERT INTO sponsor VALUES ('app team','google.com','info')"
+	cursor.execute(query)
+	connection.commit()
+	return {"status_code":200}
 
 @app.route('/postwall/<rollno>/<imageurl>')
 # Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "s": 2}]
@@ -75,7 +83,10 @@ def getUser():
     fbID = request.form.get('firebaseid')
     cursor.execute("select firebase_id as Firebaseid, rollno as 'roll number', branch, mobile, referral_friend,name,gender,url as image_url from profile where firebase_id = '{fbID}'".format(fbID=fbID))
     data = cursor.fetchone()
-    return data
+    if(data):
+        return data
+    else:
+        return {"status":"User not found"}
 
 @app.route('/like',methods=['POST'])
 def like():
@@ -102,8 +113,13 @@ app.add_url_rule('/faceSmash', 'faceSmash.faceSmash', faceSmash.faceSmash, metho
 
 @app.route('/quiz/questions',methods=['POST'])
 def quiz():
+<<<<<<< HEAD
     category=request.form['category']
     query="SELECT id,ques,option1,option2,option3,option4 FROM quiz WHERE category="+category+" ORDER BY RAND() LIMIT 10" 
+=======
+    category=request.form.get('category')
+    query="SELECT id,ques,option1,option2,option3,option4 FROM quiz WHERE category={} ORDER BY RAND() LIMIT 10".format(category)
+>>>>>>> fea6762091bf34d21d8ad11bb767c329212c5296
     cursor.execute(query)
     questions=cursor.fetchall()
     return json.dumps(questions)
@@ -194,6 +210,7 @@ def feedg(page_index, firebase_id):
 
     
     
+<<<<<<< HEAD
 # @app.route('/rewards',methods=['POST'])
 # # def rewards():
 # #     firebase_id=request.form.firebase_id
@@ -210,6 +227,16 @@ def rewards():
     cursor.execute(query)
     connection.commit()
     return {"status_code":200}# not in docs
+=======
+@app.route('/rewards',methods=['POST'])
+def rewards():
+    firebase_id=request.form.firebase_id
+    candies=request.form.sub_candies
+    query="UPDATE profile SET points=points-'"+candies+"' WHERE firebase_id='"+firebase_id+"'"
+    return {"status_code":200}# not in docs
+    
+    
+>>>>>>> fea6762091bf34d21d8ad11bb767c329212c5296
 
     #---------------------------------------------------------------------------
     
