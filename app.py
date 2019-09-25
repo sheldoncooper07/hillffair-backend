@@ -7,28 +7,69 @@ import pymysql.cursors
 import base64
 import faceSmash
 app = Flask(__name__)
-
+import faceSmash as faceSmash
 
 global cursor
 
-# DECORATOR
-# declares json app.route given app.route string
-# return simple python option1bject in the function you write
-# example:
-# @app.route("/app.route_string")
-# def function():
-#     result = {...}
 
 
 
 
-connection = pymysql.connect(host='127.0.0.1',
-                                         user='moulik',
-                                         password='bigbang2',
-                                         db='hillffair',
+connection = pymysql.connect(host='sql12.freesqldatabase.com',
+                                         user='sql12306111',
+                                         password='CABFDtx5cP',
+                                         db='sql12306111',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
 
+
+
+
+app.add_url_rule('/facesmash', 'faceSmash.faceSmash', faceSmash, methods=['GET', 'POST'])
+
+
+
+@app.route('/makeuser' , methods=['GET'])
+def hello():
+        query = "INSERT into profile VALUES ('abcd',18155,'CSE',8580635669,'DEF',12,1,'google.com')"
+        cursor.execute(query)
+        connection.commit()
+        print("Done")
+        return "hello"
+@app.route('/makeclub',methods=['GET'])
+def makeclubs():
+    query = "INSERT into clubs VALUES (123,'App Team','google.com','Hiii')"
+    cursor.execute(query)
+    connection.commit()
+    return "done"
+        
+		
+@app.route('/feed',methos=['POST'])
+def feedp():
+	firebase_id=request.form.firebase_id
+	image_url=request.form.image_url
+	#what id?
+	query="INSERT INTO wall VALUES (NULL,'"+firebase_id+"',0'"+image_url+"'"
+	cursor.execute(query)
+	connection.commit();
+	return {"status_code":200}
+	
+@app.route('/quiz/answers',methods=['POST'])
+def quiz_answers():
+	points=0
+	firebase_id=request.form.firebase_id
+	answers=request.form.answers
+	#answers is object array according to documentation
+	#for loop for each answer
+	for in range(0,answers.length):
+		cursor.execute("SELECT answer as answer FROM quiz WHERE id='"+answers[i].id"'"
+		answer=cursor.fetchone();
+		if answers[i].answer==answer:
+			points=points+1
+	cursor.execute("UPDATE profile SET points=points+'"+points+"' WHERE id='"+firebase_id+"'"
+	return {"score":points}
+			
+	
 
 @app.route('/postwall/<rollno>/<imageurl>')
 # Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "likes": 2}]
@@ -37,16 +78,21 @@ def postwall(rollno,imageurl):
     imageurl=imageurl
     #print("INSERT into wall values(NULL,'"+rollno+"','"+imageurl+"', "+str(int(time.time()+19800))+")")
     query = cursor.execute("INSERT into Wall values(NULL,'"+rollno+"','"+imageurl+"', "+str(int(time.time()+19800))+")")
-    cursor.execute(query)
-    connection.commit()
-    return {"status": "success"}
+    cursor.execute(query);
+    connection.commit();
+    return {'status': 'success',"status_code":200}
+
+
+
 
 @app.route('/user',methods=['POST'])
 def user():
-    rollno,branch,mobile,referal_friend,name,gender,image_url=request.form.rollno,request.form.branch,request.form.mobile,request.form.referal_friend,request.form.name,request.form.gender,request.form.image_url
-    query=query = cursor.execute("INSERT into profile values('"+rollno+"','"+branch+"','"+mobile+"','"+referal_friend+"',+name,gender,image_url")
+    firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.form.rollno,request.form.branch,request.form.mobile,request.form.referal_friend,request.form.name,request.form.gender,request.form.image_url
+    query=query = cursor.execute("INSERT into profile values('"+firebase_id+"''"+rollno+"','"+branch+"','"+mobile+"','"+referal_friend+"',+name,gender,image_url")
     connection.commit()
-    return {"status":"success"}
+    return {'status':'success',"status_code":200}
+ 
+ #tested
 @app.route('/user/<firebase_id>',methods=['GET'])
 def fid(firebase_id):
      query="SELECT * FROM profile AS user HAVING firebase_id='"+firebase_id+"'"
@@ -77,13 +123,14 @@ def like():
     return {"status_code":200}
     
 
+
     
 app.add_url_rule('/faceSmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'], defaults = {"connection":connection})
 
 @app.route('/quiz/questions',methods=['POST'])
 def quiz():
     category=request.form.category
-    query="SELECT * FROM quiz AS ques WHERE category='"+category+"'"
+    query="SELECT id,ques,option1,option2,option3,option4 FROM quiz ORDER BY RAND() LIMIT 10 AS ques WHERE category='"+category+"'"
     cursor.execute(query)
     questions=cursor.fetchall()
     return json.dumps(questions)
@@ -97,7 +144,9 @@ def profile():
     cursor.execute(query)
     connection.commit()
     return {"status_code":200}
-    
+
+
+
 
 @app.route('/club_info/<club_name>' ,methods=['GET'])
 def club(club_name):
@@ -112,6 +161,7 @@ def core(core_name):
     cursor.execute(query)
     core_details=cursor.fetchone()
     return core_details
+
     
     
     
@@ -122,15 +172,28 @@ def sponsors():
     cursor.execute(query)
     sponsor=cursor.fetchall()
     return json.dumps(sponsor)
+
     
 @app.route('/leaderboard')
 def leaderboard():
-    query="SELECT name,points as details from profile "
+    query="SELECT name,points as details from profile ORDER BY points DESC "
     cursor.execute(query)
     details=cursor.fetchall()
+
     return json.dumps(details)
+
+    
+    
+@app.route('/rewards',methods=['POST'])
+def rewards():
+    firebase_id=request.form.firebase_id
+    candies=request.form.sub_candies
+    query="UPDATE profile SET points=points-'"+candies+"' WHERE firebase_id='"+firebase_id+"'"
+	return {"status_code":200}# not in docs
+    
     
     #---------------------------------------------------------------------------
+    
 
 @app.route('/getwall/<int:start>/<user_id>')
 # Sample Response: [{"id": 1, "name": "Daniyaal Khan", "rollno": "17mi561", "likes": 2}]
@@ -138,6 +201,7 @@ def getwall(start,user_id):
     query = cursor.execute("SELECT w.id as id, p.name as name, p.id as rollno, (SELECT COUNT(*) FROM likes WHERE post_id=w.id) AS likes, (Select count(*) from likes where post_id=w.id AND profile_id='"+user_id+"') as liked, w.image_url, p.image_url AS profile_pic  FROM wall as w, profile as p WHERE p.id=w.profile_id ORDER BY w.time DESC")
     result = cursor.fetchall()
     return json.dumps(result)
+
 
 
 @app.route('/getlike/<int:image_id>')
@@ -187,6 +251,7 @@ def getpoint(rollno):
     result = cursor.fetchone()
     return result
 
+
 @app.route('/getschedule')
 def getschedule():
     query = cursor.execute("SELECT name as club_name, event_id,event_name,event_time,club_logo FROM events,clubs WHERE events.club_id=clubs.id")
@@ -217,6 +282,9 @@ def geteventlike(event_id):
     result = cursor.fetchone()
     return {"likes": result["COUNT(*)"]}
 
+
+	
+	
 @app.route('/getclubs')
 def getclubs():
     query = cursor.execute("SELECT * FROM clubs")
@@ -234,6 +302,7 @@ def getsponsor():
     query = cursor.execute("SELECT * FROM sponsors")
     result = cursor.fetchall()
     return json.dumps(result)
+
 
 
 @app.route('/getquiz')
