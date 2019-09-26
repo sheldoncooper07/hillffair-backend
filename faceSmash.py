@@ -27,7 +27,7 @@ def faceSmash(connection):
                 #for GET requests
                 if request.method == "GET":
                         cursor.execute("SELECT name, firebase_id, url, gender, rating FROM profile ORDER BY rating DESC")
-                        return json.dumps(cursor.fetchall())
+                        return Response(json.dumps(cursor.fetchall()), mimetype='application/json')
                 # for POST requests
                 elif request.method == "POST":
                         UID = request.form.get('UID')
