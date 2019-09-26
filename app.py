@@ -126,7 +126,7 @@ def quiz_answers():
     firebase_id = request.form.get('firebase_id')
     answers = request.form.get('answers')
 
-    for in range(0, len(answers)):
+    for i in range(0, len(answers)):
         cursor.execute("SELECT answer FROM quiz WHERE id='" + answers[i]['id']+"'")
         answer = cursor.fetchone()
         if answers[i].answer == answer:
@@ -228,21 +228,21 @@ def feedg(page_index, firebase_id):
 # #     return {"status_code":200}# not in docs
 
 
-@app.route('/rewards',methods=['POST'])
-def rewards():
-    firebase_id=request.form.get('firebase_id')
-    candies=request.form.get('sub_candies')
-    print(firebase_id,candies)
-    query = "SELECT points from profile WHERE firebase_id = "+ firebase_id
-    cursor.execute(query)
-    points = cursor.fetchall()
-    print(points)
-    if points>=candies:
-        query="UPDATE profile SET points = points -"+candies+" WHERE firebase_id="+firebase_id
-        cursor.execute(query)
-        return jsonify({"status_code":200})# not in docs
-    else:
-        return jsonify({"status_code":404})
+# @app.route('/rewards',methods=['POST'])
+# def rewards():
+#     firebase_id=request.form.get('firebase_id')
+#     candies=request.form.get('sub_candies')
+#     print(firebase_id,candies)
+#     query = "SELECT points from profile WHERE firebase_id = "+ firebase_id
+#     cursor.execute(query)
+#     points = cursor.fetchall()
+#     print(points)
+#     if points>=candies:
+#         query="UPDATE profile SET points = points -"+candies+" WHERE firebase_id="+firebase_id
+#         cursor.execute(query)
+#         return jsonify({"status_code":200})# not in docs
+#     else:
+#         return jsonify({"status_code":404})
 
 
 

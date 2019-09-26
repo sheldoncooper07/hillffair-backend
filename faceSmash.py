@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, logging
+from flask import Flask , request, Response
 import pymysql.cursors
 import json
 import numpy
@@ -61,5 +61,5 @@ def faceSmash(connection):
                         connection.commit()
                         # insertion to queue table
                         if cursor.rowcount == 0:
-                                return {'status':'fail'}
+                                return Response(json.dumps({'status':'fail'}),mimetype="application/json")
                         return {'status':'success'}
