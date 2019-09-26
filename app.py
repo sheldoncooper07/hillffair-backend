@@ -7,13 +7,15 @@ import pymysql.cursors
 import base64
 import faceSmash
 app = Flask(__name__)
-import faceSmash as faceSmash
+import faceSmash
+import quiz_answers
+import rewards
 
 global cursor
 
-connection = pymysql.connect(host='localhost',
-                                         user='hillffair',
-                                         password='1qaz2wsx',
+connection = pymysql.connect(host='127.0.0.1',
+                                         user='moulik',
+                                         password='bigbang2',
                                          db='hillffair',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
@@ -33,8 +35,8 @@ def postwall(rollno,imageurl):
     imageurl=imageurl
     #print("INSERT into wall values(NULL,'"+rollno+"','"+imageurl+"', "+str(int(time.time()+19800))+")")
     query = cursor.execute("INSERT into Wall values(NULL,'"+rollno+"','"+imageurl+"', "+str(int(time.time()+19800))+")")
-    cursor.execute(query);
-    connection.commit();
+    cursor.execute(query)
+    connection.commit()
     return {'status': 'success',"status_code":200}
 
 
@@ -106,11 +108,13 @@ def like():
     
     
 app.add_url_rule('/faceSmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'], defaults = {"connection":connection})
+app.add_url_rule('/quiz/answers','quiz_answers.answers',quiz_answers.answers,methods=['POST'],defaults={"connection":connection})
+app.add_url_rule('/rewards','rewards.rewards', rewards.rewards, methods = ["POST"],defaults = {"connection":connection})
 
 @app.route('/quiz/questions',methods=['POST'])
 def quiz():
-    category=request.form.get('category')
-    query="SELECT id,ques,option1,option2,option3,option4 FROM quiz WHERE category={} ORDER BY RAND() LIMIT 10".format(category)
+    category=request.form.get("category")   
+    query = "SELECT id,ques,option1,option2,option3,option4 FROM quiz WHERE category={} ORDER BY RAND() LIMIT 10 ".format(category)
     cursor.execute(query)
     questions=cursor.fetchall()
     return json.dumps(questions)
@@ -252,4 +256,4 @@ def getschedule():
 
 
 if __name__ == '__main__':
-    app.run(debug = True, host='0.0.0.0')
+    app.run(debug = True, host='127.0.0.1')

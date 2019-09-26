@@ -32,7 +32,7 @@ CREATE TABLE `profile` (
   `points` int(11) NOT NULL,
   `gender` tinyint(1) NOT NULL,
   `url` varchar(255) NOT NULL,
-  `rating` int(10) NOT NULL DEFAULT 0,
+  `rating` int(10) NOT NULL DEFAULT 1500,
   `referral_friend` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

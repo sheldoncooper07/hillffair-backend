@@ -1,11 +1,21 @@
 from flask import Flask, render_template, request, redirect, url_for, session, logging
 import pymysql.cursors
+import json
 import numpy
 
 
 # add following code to use in app.py
 # app.add_url_rule('/facesmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'], defaults = {"connection":connection})
 
+
+def ELO_Change(RWin, RLose):
+        x = 400
+        y = 30
+        eA = 1/(1+10**((RLose-RWin)/x))
+        eB = 1-eA
+        print(y*(1-eA), y*eB)
+        print(RWin+y*(1-eA), RLose+y*(0-eB))
+        return RWin+y*(1-eA), RLose+y*(0-eB)
 
 def faceSmash(connection):
         faceSmash_tableName = "profile"
@@ -16,48 +26,40 @@ def faceSmash(connection):
         with connection.cursor() as cursor:
                 #for GET requests
                 if request.method == "GET":
-                        #generating gender
-                        gen = numpy.random.randint(0, 2)
-                        # generating the range of users to be considered
-                        cursor.execute("select min(rating), max(rating) from " +
-                                       str(faceSmash_tableName)+" where gender = '"+str(gen)+"';")
-                        league = cursor.fetchone()
-                        minVal = league["min(rating)"]
-                        maxVal = league["max(rating)"]
-                        league = numpy.random.randint(minVal, maxVal+1)
-                        #selecting users from the given range
-                        cursor.execute("select * from "+str(faceSmash_tableName)+" where rating >= "+str(league-faceSmash_league_diff)+" AND rating <=" + str(league+faceSmash_league_diff)+" AND gender = '"+str(gen)+"'"
-                                       "order by rand();")
-                        ans = cursor.fetchall()
-                        checks = 0
-                        while(len(ans) < 2):
-                                checks += 1
-                                if checks == 10:
-                                        break
-                                gen = numpy.random.randint(0, 2)
-                                cursor.execute(
-                                    "select min(rating), max(rating) from "+str(faceSmash_tableName)+" where gender = '"+str(gen)+"';")
-                                league = cursor.fetchone()
-                                minVal = league["min(rating)"]
-                                maxVal = league["max(rating)"]
-                                league = numpy.random.randint(minVal, maxVal+1)
-                                cursor.execute("select * from "+str(faceSmash_tableName)+" where rating >= "+str(league-faceSmash_league_diff)+" AND rating <=" + str(league+faceSmash_league_diff)+" AND gender = '"+str(gen)+"'"
-                                               "order by rand();")
-                                ans = cursor.fetchall()
-                        # final failsafe
-                        if checks == 10:
-                                gen = numpy.random.randint(0, 2)
-                                cursor.execute(
-                                    "select * from "+str(faceSmash_tableName)+" where  gender = '"+str(gen)+"'order by rand();")
-                                ans = cursor.fetchall()
-                        return "[{image_url:"+str(ans[0]["url"])+"},{image_url:"+str(ans[1]["url"])+"}]"
+                        cursor.execute("SELECT name, firebase_id, url, gender, rating FROM profile ORDER BY rating DESC")
+                        return json.dumps(cursor.fetchall())
                 # for POST requests
                 elif request.method == "POST":
-                        imgURL = request.form.get('image_url')
+                        UID = request.form.get('UID')
+                        ID1 = request.form.get('ID1')
+                        ID2 = request.form.get('ID2')
+                        WID = request.form.get('WID')
                         # incrementing the rating of winning user
-                        cursor.execute("update "+str(faceSmash_tableName)+" set rating = rating + "+str(
-                            faceSmash_ratingIncrease)+" where url = '"+str(imgURL)+"';")
+                        
+                        cursor.execute("select rating from profile where firebase_id = {}".format(WID))
+                        rA = cursor.fetchone()
+                        rA = rA["rating"]
+                        print(rA)
+                        LID=ID2
+                        if ID2==WID:
+                                print("swaping")
+                                LID=ID1
+                        cursor.execute("select rating from profile where firebase_id = {}".format(LID))
+                        rB = cursor.fetchone()
+                        rB = rB["rating"]
+                        print(rB)
+                        rA,rB = ELO_Change(rA,rB)
+                        print(rA)
+                        print(rB)                        
+                        query = "UPDATE profile SET rating = {} where firebase_id = {}".format(round(rA),WID)
+                        cursor.execute(query)
                         connection.commit()
+                        print(query)
+                        query = "UPDATE profile SET rating = {} where firebase_id = {}".format(round(rB),LID)
+                        print(query)
+                        cursor.execute(query)
+                        connection.commit()
+                        # insertion to queue table
                         if cursor.rowcount == 0:
                                 return {'status':'fail'}
                         return {'status':'success'}
