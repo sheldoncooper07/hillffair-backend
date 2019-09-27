@@ -1,8 +1,6 @@
 from flask import Flask , request, Response
 import pymysql.cursors
 import json
-import numpy
-
 
 # add following code to use in app.py
 # app.add_url_rule('/facesmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'], defaults = {"connection":connection})
