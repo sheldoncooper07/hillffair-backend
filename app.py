@@ -54,7 +54,7 @@ def addUser():
         branch = request.form.get('branch')
         mobile = request.form.get('mobile')
         referral = request.form.get('referral_friend')
-        imgURL = "0"        
+        imgURL = "0"
         status = request.form.get('face_smash_status')
         if status != 0:
             imgURL = request.form.get('image_url')
@@ -128,7 +128,7 @@ def like():
         except:
             return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json", status=400)
     return Response(json.dumps({"status":"success", "status_code":"200"}),mimetype="application/json",status=200)
-    
+
 @app.route('/unlike',methods=["POST"])
 def unlike():
     firebase_id = request.form["firebase_id"]
@@ -145,14 +145,14 @@ def unlike():
     return Response(json.dumps({"status": "success", "status_code": "200"}), mimetype="application/json",status=200)
 
 
-    
+
 app.add_url_rule('/faceSmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'], defaults = {"connection":connection})
 app.add_url_rule('/quiz/answers','quiz_answers.answers',quiz_answers.answers,methods=['POST'],defaults={"connection":connection})
 app.add_url_rule('/rewards','rewards.rewards', rewards.rewards, methods = ["POST"],defaults = {"connection":connection})
 
 @app.route('/quiz/questions',methods=['POST'])
 def quiz():
-    category=request.form.get("category")   
+    category=request.form.get("category")
     query = "SELECT id,ques,option1,option2,option3,option4 FROM quiz WHERE category={} ORDER BY RAND() LIMIT 10 ".format(category)
     cursor.execute(query)
     if cursor.rowcount == 0:
@@ -167,11 +167,11 @@ def quiz():
 @app.route('/profile',methods=['POST'])
 def profile():
     firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.form.firebase_id,request.form.rollno,request.form.branch,request.form.mobile,request.form.referl_friend,request.form.name,request.form.gender,request.form.image_url
-    query="INSERT INTO profile VALUES(firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url"
+    query="INSERT INTO profile VALUES(firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url)"
     cursor.execute(query)
     connection.commit()
     return {"status_code":200}
-    
+
 
 
 @app.route('/Club_info' ,methods=['GET'])
@@ -188,7 +188,7 @@ def club():
     return Response(json.dumps(ans),mimetype="application/json",status=200)
 
 
-@app.route('/core_team/' ,methods=['GET'])  
+@app.route('/core_team/' ,methods=['GET'])
 def core():
     query="SELECT name, profile_pic AS image_url, position FROM coreteam"
     cursor.execute(query)
@@ -200,7 +200,7 @@ def core():
     ans["status_code"]="200"
     ans["members"]=core_details
     return Response(json.dumps(ans),mimetype="application/json",status=200)
-    
+
 @app.route('/sponsors')
 def sponsors():
     query="SELECT sponsor_name, sponsor_logo AS image_url, sponsor_info FROM sponsors AS sponsor"
@@ -214,7 +214,7 @@ def sponsors():
     ans["sponsors"]=sponsor
     return Response(json.dumps(ans),mimetype="application/json", status = 200)
 
-    
+
 @app.route('/leaderboard')
 def leaderboard():
     query="SELECT name AS Name, points AS candies, gender AS Gender FROM profile order by points DESC"
@@ -235,7 +235,7 @@ def feed():
     firebase_id=request.form['firebase_id']
     url=request.form['image_url']
     try:
-        query="INSERT INTO wall VALUES(NULL,'{}',0,{}".format(firebase_id,url)
+        query="INSERT INTO wall VALUES(NULL,'{}',0,{})".format(firebase_id,url)
         cursor.execute(query)
     except:
         return Response(json.dumps({"status": "failure", "status_code": "400"}), mimitype = 'application/json', status = 400)
@@ -280,8 +280,8 @@ def feedg(page_index, firebase_id):
     ans["feed"] = ret_arr
     return Response(json.dumps(ans),mimetype="application/json", status = 200)
 
-    
-    
+
+
 
 # @app.route('/rewards',methods=['POST'])
 # # def rewards():
