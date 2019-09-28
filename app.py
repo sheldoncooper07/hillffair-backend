@@ -235,12 +235,13 @@ def feed():
     firebase_id=request.form['firebase_id']
     url=request.form['image_url']
     try:
-        query="INSERT INTO wall VALUES(NULL,'{}',0,{})".format(firebase_id,url)
+        query="INSERT INTO wall VALUES(NULL,'{}',0,'{}')".format(firebase_id,url)
+        print(query)
         cursor.execute(query)
     except:
-        return Response(json.dumps({"status": "failure", "status_code": "400"}), mimitype = 'application/json', status = 400)
+        return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype = 'application/json', status = 400)
     connection.commit()
-    return Response(json.dumps({"status": "success", "status_code": "200", }),mimitype = "application/json", status = 200)
+    return Response(json.dumps({"status": "success", "status_code": "200", }),mimetype = "application/json", status = 200)
 
 @app.route('/feed/<page_index>/<firebase_id>', methods=['GET'])
 def feedg(page_index, firebase_id):
