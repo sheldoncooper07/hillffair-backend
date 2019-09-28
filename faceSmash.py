@@ -11,8 +11,6 @@ def ELO_Change(RWin, RLose):
         y = 30
         eA = 1/(1+10**((RLose-RWin)/x))
         eB = 1-eA
-        print(y*(1-eA), y*eB)
-        print(RWin+y*(1-eA), RLose+y*(0-eB))
         return RWin+y*(1-eA), RLose+y*(0-eB)
 
 def faceSmash(connection):
@@ -25,7 +23,9 @@ def faceSmash(connection):
                 #for GET requests
                 if request.method == "GET":
                         cursor.execute("SELECT name, firebase_id, url, gender, rating FROM profile ORDER BY rating DESC")
-                        return Response(json.dumps(cursor.fetchall()), mimetype='application/json')
+                        if cursor.rowcount == 0:
+                                return Response({"status":"fail"},mimetype = 'application/json')
+                        return Response(json.dumps(cursor.fetchall()),mimetype=("application/json"))
                 # for POST requests
                 elif request.method == "POST":
                         UID = request.form.get('UID')
@@ -35,29 +35,30 @@ def faceSmash(connection):
                         # incrementing the rating of winning user
                         
                         cursor.execute("select rating from profile where firebase_id = {}".format(WID))
+                        if cursor.rowcount==0:
+                                return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
                         rA = cursor.fetchone()
                         rA = rA["rating"]
-                        print(rA)
                         LID=ID2
                         if ID2==WID:
-                                print("swaping")
                                 LID=ID1
                         cursor.execute("select rating from profile where firebase_id = {}".format(LID))
+                        if cursor.rowcount==0:
+                                return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
                         rB = cursor.fetchone()
                         rB = rB["rating"]
-                        print(rB)
                         rA,rB = ELO_Change(rA,rB)
-                        print(rA)
-                        print(rB)                        
                         query = "UPDATE profile SET rating = {} where firebase_id = {}".format(round(rA),WID)
                         cursor.execute(query)
                         connection.commit()
-                        print(query)
+                        if cursor.rowcount == 0:
+                                return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
                         query = "UPDATE profile SET rating = {} where firebase_id = {}".format(round(rB),LID)
-                        print(query)
                         cursor.execute(query)
                         connection.commit()
+                        if cursor.rowcount == 0:
+                                return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
                         # insertion to queue table
                         if cursor.rowcount == 0:
-                                return Response(json.dumps({'status':'fail'}),mimetype="application/json")
-                        return {'status':'success'}
+                                return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
+                        return Response(json.dumps({"status": "success", "status_code": "200"}),mimetype="application/json",status=200)
