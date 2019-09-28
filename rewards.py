@@ -1,23 +1,18 @@
 from flask import Flask, request, Response
 from pymysql import cursors
+import json
 
 def rewards(connection):
-    fbID = request.form.get("firebaseid")
-    print(fbID)
+    fbID = request.form.get("firebase_id")
     subCnd = request.form.get("sub_candies")
     with connection.cursor() as cursor:
-        cursor.execute("SELECT points from profile where firebase_id = {}".format(fbID))
+        cursor.execute("SELECT points from profile where firebase_id = '{}'".format(fbID))
         candies = cursor.fetchone()
         if cursor.rowcount==0:
-            return Response({"status":"fail"},mimetype="application/json")
+            return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json", status = 400)
         candies = candies["points"]
-        print(candies)
-        print(subCnd)
-        if(int(candies)<int(subCnd)):
-            return {"status":"fail"}
-        print("UPDATE profile SET points = points - {} WHERE firebase_id = '{}'".format((subCnd), fbID))
-        cursor.execute("UPDATE profile SET points = points - {} WHERE firebase_id = '{}'".format((subCnd),fbID))
+        if(int(candies) < int(subCnd)):
+            return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json", status=400)
+        cursor.execute("UPDATE profile SET points = points - {} WHERE firebase_id = '{}'".format(subCnd,fbID))
         connection.commit()
-        if cursor.rowcount==0:
-            return Response({"status":"fail"},mimetype="application/json")
-        return {"status":"success"}
+        return Response(json.dumps({"status": "success", "status_code": "200"}), mimetype="application/json", status=200)

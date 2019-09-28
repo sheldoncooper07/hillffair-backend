@@ -15,8 +15,8 @@ import quiz_answers
 global cursor
 
 connection = pymysql.connect(host='127.0.0.1',
-                                         user='hillffair',
-                                         password='1qaz2wsx',
+                                         user='moulik',
+                                         password='bigbang2',
                                          db='hillffair',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
@@ -43,14 +43,18 @@ def postwall(rollno,imageurl):
 
 @app.route('/User', methods=['POST'])
 def addUser():
-    try:
+    # try:
         fbID = request.form.get('firebase_id')
         cursor.execute("SELECT firebase_id FROM profile WHERE firebase_id = '{}'".format(fbID))
         if cursor.rowcount != 0:
             return Response(json.dumps({"status": "failure", "reason": "User already exists", "status_code": "400"}), mimetype="application/json",status = 400)
         name = request.form.get('name')
         gender = request.form.get('gender')
-        rollno = request.form.get('roll number')
+        if gender == "MALE":
+            gender = 0
+        else:
+            gender = 1
+        rollno = request.form.get('roll_number')
         branch = request.form.get('branch')
         mobile = request.form.get('mobile')
         referral = request.form.get('referral_friend')
@@ -58,10 +62,11 @@ def addUser():
         status = request.form.get('face_smash_status')
         if status != 0:
             imgURL = request.form.get('image_url')
-        cursor.execute("INSERT into profile VALUES('{FbID}','{roll}','{branch}','{mobile}','{name}',0,'{gender}','{url}',0,'{referral}, 0')".format(FbID=fbID,roll=rollno,branch=branch,mobile=mobile,name=name,gender=gender,url=imgURL,referral = referral))
+        cursor.execute("select * from profile;")
+        cursor.execute("INSERT into profile VALUES('{FbID}','{roll}','{branch}','{mobile}','{name}',0,{gender},'{url}',1500,'{referral}', '0')".format(FbID=fbID,roll=rollno,branch=branch,mobile=mobile,name=name,gender=gender,url=imgURL,referral = referral))
         connection.commit()
         return Response(json.dumps({"status": "success", "status_code": "200"}),mimetype = "application/json", status = 200)
-    except:
+    # except:
         return Response(json.dumps({"status": "failure", "reason": "Unknown", "status_code": "400"}), mimetype="application/json")
 
 @app.route('/User/<fbID>',methods=["GET"])
@@ -72,13 +77,14 @@ def getUserProfile(fbID):
     data = cursor.fetchone()
     return Response(json.dumps(data),mimetype="application/json",status =200)
 
-@app.route('/User/update')
+@app.route('/User/Update', methods = ["POST"])
 def updateUser():
     fbID = request.form.get("firebase_id")
     if fbID == None :
         return Response(json.dumps({"status": "failure", "status_code": "400"}),mimetype="application/json",status=400)
     imgURL = request.form.get("image_url")
-    cursor.execute("UPDATE profile SET url = '{}',  WHERE firebase_id ='{}'".format(imgURL,fbID))
+    cursor.execute("UPDATE profile SET url = '{}', face_smash_status = 1 WHERE firebase_id ='{}'".format(imgURL,fbID))
+    connection.commit()
     return Response(json.dumps({"status":"success", "status_code":"200"}),mimetype="application/json",status=200)
 
 
@@ -112,43 +118,54 @@ def like():
     firebase_id=request.form['firebase_id']
     post_id=request.form['post_id']
 
-    query = "SELECT COUNT(*) AS likes FROM likes WHERE firebase_id='{}' AND post={}".format(firebase_id, post_id)
+    query = "SELECT * FROM likes WHERE firebase_id='{}' AND post={}".format(firebase_id, post_id)
     cursor.execute(query)
-    likes = cursor.fetchone()
-    if likes == 0:
+    if cursor.rowcount==0:
         try:
+            print("deb")
             cursor.execute("INSERT INTO likes VALUES(NULL,{},'{}')".format(post_id,firebase_id))
+            connection.commit()
             cursor.execute("SELECT firebase_id FROM wall WHERE id={}".format(post_id))
-            cursor.execute("UPDATE wall SET likes = likes+1 WHERE firebase_id = '{}' AND id = {}".format(firebase_id,post_id))
+            print("deb")
             fbID = cursor.fetchone().get("firebase_id")
+            cursor.execute("UPDATE wall SET likes = likes+1 WHERE firebase_id = '{}' AND id = {}".format(firebase_id,post_id))
+            print("deb")
+            connection.commit()
+            print(
+            	"UPDATE profile SET points=points+1 WHERE firebase_id = '{}'".format(fbID))
             cursor.execute("UPDATE profile SET points=points+1 WHERE firebase_id = '{}'".format(fbID))
-            cursor.commit()
+            print("deb")
+            connection.commit()
+            print(cursor.rowcount)
             if cursor.rowcount == 0:
                 return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json",status=400)
+            return Response(json.dumps({"status":"success", "status_code":"200"}), mimetype = "application/json", status = 200)
         except:
             return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json", status=400)
-    return Response(json.dumps({"status":"success", "status_code":"200"}),mimetype="application/json",status=200)
-
+    return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
+    
 @app.route('/unlike',methods=["POST"])
 def unlike():
     firebase_id = request.form["firebase_id"]
     post_id = request.form["post_id"]
-    cursor.execute("SELECT COUNT(*) AS likes FROM likes WHERE firebase_id='{}' AND post={}".format(firebase_id,post_id))
+    cursor.execute("SELECT * FROM likes WHERE firebase_id='{}' AND post={}".format(firebase_id,post_id))
     if cursor.rowcount == 0:
         return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
     cursor.execute("DELETE FROM likes WHERE firebase_id='{}' AND post={}".format(firebase_id,post_id))
+    connection.commit()
     cursor.execute("SELECT firebase_id FROM wall WHERE id = {}".format(post_id))
-    fbID = cursor.fetchone()
+    fbID = cursor.fetchone()["firebase_id"]
     cursor.execute("UPDATE profile SET points = points-1 WHERE firebase_id = '{}'".format(fbID))
+    connection.commit()
     cursor.execute("UPDATE wall SET likes = likes-1 WHERE firebase_id = '{}' AND id = {}".format(firebase_id,post_id))
-    cursor.commit()
+    connection.commit()
     return Response(json.dumps({"status": "success", "status_code": "200"}), mimetype="application/json",status=200)
 
 
 
 app.add_url_rule('/faceSmash', 'faceSmash.faceSmash', faceSmash.faceSmash, methods=['GET', 'POST'], defaults = {"connection":connection})
 app.add_url_rule('/quiz/answers','quiz_answers.answers',quiz_answers.answers,methods=['POST'],defaults={"connection":connection})
-app.add_url_rule('/rewards','rewards.rewards', rewards.rewards, methods = ["POST"],defaults = {"connection":connection})
+app.add_url_rule('/reward','rewards.rewards', rewards.rewards, methods = ["POST"],defaults = {"connection":connection})
 
 @app.route('/quiz/questions',methods=['POST'])
 def quiz():
@@ -235,12 +252,11 @@ def feed():
     firebase_id=request.form['firebase_id']
     url=request.form['image_url']
     try:
-        query="INSERT INTO wall VALUES(NULL,'{}',0,'{}')".format(firebase_id,url)
-        print(query)
+        query="INSERT INTO wall VALUES(Null,'{}',0,'{}')".format(firebase_id,url)
         cursor.execute(query)
+        connection.commit()
     except:
         return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype = 'application/json', status = 400)
-    connection.commit()
     return Response(json.dumps({"status": "success", "status_code": "200", }),mimetype = "application/json", status = 200)
 
 @app.route('/feed/<page_index>/<firebase_id>', methods=['GET'])
@@ -258,23 +274,11 @@ def feedg(page_index, firebase_id):
     for i in range(0, len(photos)):
         print(photos[i])
         cursor.execute("SELECT * FROM likes WHERE firebase_id= '{}' AND post={}".format(firebase_id,page_index))
+        like = 1
         if cursor.rowcount==0:
-            return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json", status = 400)
-        like=cursor.fetchone()
-        if(like):
-            q="SELECT COUNT(*) FROM likes WHERE post="+str(photos[i]['id'])
-            cursor.execute(q)
-            if cursor.rowcount == 0:
-                return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json",status = 400)
-            count=len(cursor.fetchall())
-            ret_arr.append({"image_url":photos[i]['url'], "likes":count,"liked":1})
-        else:
-        	q="SELECT COUNT(*) FROM likes WHERE post="+str(photos[i]['id'])
-        	cursor.execute(q)
-        	if cursor.rowcount == 0:
-                	return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json", status = 400)
-        	count=len(cursor.fetchall())
-	        ret_arr.append({"image_url":photos[i]['url'], "likes":count,"liked":0})
+            like = 0
+        count = photos[i]["likes"]
+        ret_arr.append({"post_id":photos[i]["id"],"image_url":photos[i]['url'], "likes":count,"liked":like})
     ans = {}
     ans["status"] = "success"
     ans["status_code"] = "200"
