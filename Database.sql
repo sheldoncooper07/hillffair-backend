@@ -49,7 +49,7 @@ CREATE TABLE `quiz` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `schedule` (
-  `id` int(10) NOT NULL,
+  `event_id` int(5) NOT NULL,
   `Event_name` varchar(100) NOT NULL,
   `likes` int(10) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -69,7 +69,7 @@ CREATE TABLE `wall` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
-ALTER TABLE `clubs`
+ALTER TABLE `bs`
   ADD PRIMARY KEY (`id`);
 
 ALTER TABLE `coreteam`
