@@ -72,7 +72,7 @@ CREATE TABLE `wall` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
-ALTER TABLE `bs`
+ALTER TABLE `clubs`
   ADD PRIMARY KEY (`id`);
 
 ALTER TABLE `coreteam`
