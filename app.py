@@ -71,7 +71,7 @@ def addUser():
 
 @app.route('/User/<fbID>',methods=["GET"])
 def getUserProfile(fbID):
-    cursor.execute("SELECT 'success' AS 'status', '200' AS 'status_code', firebase_id AS firebase_id, rollno AS 'roll_number', branch, mobile, referral_friend,name,gender,url AS image_url, face_smash_status FROM profile WHERE firebase_id = '{fbID}'".format(fbID=fbID))
+    cursor.execute("SELECT 'success' AS 'status', '200' AS 'status_code', firebase_id AS firebase_id, rollno AS 'roll_number', branch, mobile, points as 'candies', referral_friend,name,gender,url AS image_url, face_smash_status FROM profile WHERE firebase_id = '{fbID}'".format(fbID=fbID))
     if cursor.rowcount == 0:
             return Response(json.dumps({"status":"failure","status_code":"400"}), mimetype="application/json",status = 400)
     data = cursor.fetchone()
