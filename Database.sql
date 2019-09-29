@@ -49,9 +49,12 @@ CREATE TABLE `quiz` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `schedule` (
-  `id` int(10) NOT NULL,
-  `Event_name` varchar(100) NOT NULL,
-  `likes` int(10) DEFAULT '0'
+  `event_id` int(10) NOT NULL AUTO_INCREMENT,
+  `club_id` int(10) DEFAULT NULL,
+  `club_name` varchar(100) DEFAULT NULL,
+  `event_name` varchar(100) DEFAULT NULL,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`event_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `sponsors` (

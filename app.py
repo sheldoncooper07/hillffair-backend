@@ -62,7 +62,7 @@ def addUser():
         status = request.form.get('face_smash_status')
         if status != 0:
             imgURL = request.form.get('image_url')
-        cursor.execute("select * from profile;")
+        cursor.execute("SELECT * FROM profile;")
         cursor.execute("INSERT into profile VALUES('{FbID}','{roll}','{branch}','{mobile}','{name}',0,{gender},'{url}',1500,'{referral}', '0')".format(FbID=fbID,roll=rollno,branch=branch,mobile=mobile,name=name,gender=gender,url=imgURL,referral = referral))
         connection.commit()
         return Response(json.dumps({"status": "success", "status_code": "200"}),mimetype = "application/json", status = 200)
@@ -71,7 +71,7 @@ def addUser():
 
 @app.route('/User/<fbID>',methods=["GET"])
 def getUserProfile(fbID):
-    cursor.execute("SELECT 'success' AS 'status', '200' AS 'status_code', firebase_id AS firebase_id, rollno AS 'roll_number', branch, mobile, points as 'candies', referral_friend,name,gender,url AS image_url, face_smash_status FROM profile WHERE firebase_id = '{fbID}'".format(fbID=fbID))
+    cursor.execute("SELECT 'success' AS 'status', '200' AS 'status_code', firebase_id AS firebase_id, rollno AS 'roll_number', branch, mobile, points AS 'candies', referral_friend,name,gender,url AS image_url, face_smash_status FROM profile WHERE firebase_id = '{fbID}'".format(fbID=fbID))
     if cursor.rowcount == 0:
             return Response(json.dumps({"status":"failure","status_code":"400"}), mimetype="application/json",status = 400)
     data = cursor.fetchone()
@@ -314,18 +314,46 @@ def feedg(page_index, firebase_id):
 
 
 
-@app.route('/getschedule')
-def getschedule():
-    query = cursor.execute("SELECT name AS club_name, event_id,event_name,event_time,club_logo FROM events,clubs WHERE events.club_id=clubs.id")
-    result = cursor.fetchall()
-    ans = {}
-    ans["status"]="success"
-    ans["status_code"]=200
-    ans["schedule"]=result
-    #for x in result:
-        #x["event_time"] = x["event_time"].timestamp()
-    return Response(json.dumps(ans),mimetype="application/json", status = 200)
+@app.route('/schedule', methods = ["GET", "POST"])
+def schedule():
+    if request.method == "GET":
+        cursor.execute("SELECT event_id, club_name, event_name, date(time) AS date, time(time) AS time FROM schedule INNER JOIN clubs ON clubs.id = schedule.club_id")
+        if cursor.rowcount == 0:
+            return Response(json.dumps({"status":"failure", "status_code":"200"}),content_type = "application/json", status = 200)
+        ans = {}
+        ans["status"] = "success"
+        ans["status_code"] = "200"
+        ans["schedule"] = cursor.fetchall()
+        for i in range(cursor.rowcount):
+            ans["schedule"][i]["time"] = str(ans["schedule"][i]["time"])
+            ans["schedule"][i]["date"] = str(ans["schedule"][i]["date"])
+        return Response(json.dumps(ans),mimetype = "application/json", status = 200)
+    elif request.method == "POST":
+        club_name = request.form.get("club_name")
+        event_name = request.form.get("event_name")
+        time = request.form.get("time")
+        try:
+            cursor.execute("INSERT INTO schedule VALUES(Null,(SELECT id FROM clubs WHERE name = '{club_name}'), '{club_name}', '{event_name}', '{time}')".format(club_name = club_name, event_name = event_name, time = time))
+            connection.commit()
+            return Response(json.dumps({"status": "success", "status_code": "200"}), mimetype = "application/json", status=200)
+        except:
+            return Response(json.dumps({"status":"failure","status_code":"400"}),mimetype="application/json", status=  400)
 
+@app.route("/schedule/<club_name>")
+def ClubSchedule(club_name):
+    cursor.execute("SELECT event_id, club_name, event_name, date(time) AS date, time(time) AS time FROM schedule INNER JOIN clubs ON clubs.id = schedule.club_id where club_name = '{}'".format(club_name))
+    if cursor.rowcount == 0:
+        return Response(json.dumps({"status":"failure", "status_code":"200"}),content_type = "application/json", status = 200)
+    ans = {}
+    ans["status"] = "success"
+    ans["status_code"] = "200"
+    ans["schedule"] = cursor.fetchall()
+    for i in range(cursor.rowcount):
+        ans["schedule"][i]["time"] = str(ans["schedule"][i]["time"])
+        ans["schedule"][i]["date"] = str(ans["schedule"][i]["date"])
+    return Response(json.dumps(ans), mimetype="application/json", status=200)
+
+    
 
 if __name__ == '__main__':
     app.run(debug = True, host='127.0.0.1')
