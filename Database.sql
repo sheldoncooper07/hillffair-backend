@@ -55,6 +55,7 @@ CREATE TABLE `schedule` (
   `club_name` varchar(100) DEFAULT NULL,
   `event_name` varchar(100) DEFAULT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  'venue' varchar(200) DEFAULT NULL,
   PRIMARY KEY (`event_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

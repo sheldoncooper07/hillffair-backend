@@ -84,7 +84,8 @@ def updateUser():
     fbID = request.form.get("firebase_id")
     try:
         imgURL = request.form.get("image_url")
-        cursor.execute("UPDATE profile SET url = '{}', face_smash_status = 1 WHERE firebase_id ='{}'".format(imgURL,fbID))
+        name = request.form.get("name")
+        cursor.execute("UPDATE profile SET url = '{}', name = '{}', face_smash_status = 1 WHERE firebase_id ='{}'".format(imgURL, name,fbID))
         connection.commit()
     except:
         return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status=200)
@@ -345,8 +346,9 @@ def schedule():
         club_name = request.form.get("club_name")
         event_name = request.form.get("event_name")
         time = request.form.get("time")
+        venue = request.form.get("venue")
         try:
-            cursor.execute("INSERT INTO schedule VALUES(Null,(SELECT id FROM clubs WHERE name = '{club_name}'), '{club_name}', '{event_name}', '{time}')".format(club_name = club_name, event_name = event_name, time = time))
+            cursor.execute("INSERT INTO schedule VALUES(Null,(SELECT id FROM clubs WHERE name = '{club_name}'), '{club_name}', '{event_name}', '{time}', '{venue}')".format(club_name = club_name, event_name = event_name, time = time, venue = venue))
             connection.commit()
             return Response(json.dumps({"status": "success", "status_code": "200"}), mimetype = "application/json", status=200)
         except:
