@@ -11,14 +11,35 @@ def javaHashMapStrToJson(data):
     data = sorted(data,key = lambda i:i['id'])
     return data
 
+def mod(n):
+    if n < 0:
+        return -n
+    return n
+
+def ratingChange(rating, cAns):
+    exp = rating/200.0
+    sgn = 1
+    if exp>=10:
+        exp = .9*cAns
+        rChange = 1000/mod(rating-2000)
+        return int(rating+rChange)
+    if cAns-exp < 0:
+        sgn = -1
+    elif cAns-exp == 0:
+        sgn = 0
+    print(exp)
+    rChange = sgn*(mod(5+cAns-exp)**2)
+    print(rChange)
+    return int(rating+rChange)
+
 def answers(connection):
     with connection.cursor() as cursor:
-        id = request.form.get("firebase_id")
+        fbid = request.form.get("firebase_id")
         data = request.form.get("answers")
         try:
             data = javaHashMapStrToJson(data)
         except:
-            return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status = 400)
+            return Response(json.dumps({"status":"failure", "status_code":"200"}),mimetype="application/json",status = 200)
         score = 0
         id = 0
         query = "select * from quiz where id = ".format(data[id]["id"])
@@ -29,11 +50,17 @@ def answers(connection):
         query = query[:-9]
         cursor.execute(query)
         if cursor.rowcount==0:
-            return Response({"status":"fail"},mimetype="application/json")
+            return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status=200)
         ans = cursor.fetchall()
         for i in range(len(data)):
             qid = ans[id]["id"]
             if(int(ans[id]["ans"])==int(data[id]["ans"])):
                 score+=1
             id+=1
+        cursor.execute("SELECT quiz_rating FROM profile WHERE firebase_id = '{}'".format(fbid))
+        rating = cursor.fetchone()
+        rating = rating["quiz_rating"]
+        newRating = ratingChange(rating,score)
+        cursor.execute("UPDATE profile SET quiz_rating = '{}', points = points + {} WHERE firebase_id = '{}'".format(newRating,score,fbid))
+        connection.commit()
     return Response(json.dumps({"status": "success", "status_code": "200", "score": score}),mimetype = "application/json",status = 200)

@@ -22,7 +22,7 @@ def faceSmash(connection):
         with connection.cursor() as cursor:
                 #for GET requests
                 if request.method == "GET":
-                        cursor.execute("SELECT name, firebase_id, url, gender, rating FROM profile ORDER BY rating DESC")
+                        cursor.execute("SELECT name, firebase_id, url, points as 'candies', gender, rating FROM profile WHERE face_smash_status != 0 ORDER BY rating DESC")
                         if cursor.rowcount == 0:
                                 return Response({"status":"fail"},mimetype = 'application/json')
                         return Response(json.dumps(cursor.fetchall()),mimetype=("application/json"))
@@ -36,29 +36,22 @@ def faceSmash(connection):
                         
                         cursor.execute("SELECT rating FROM profile WHERE firebase_id = '{}'".format(WID))
                         if cursor.rowcount==0:
-                                return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
+                                return Response(json.dumps({"status":"failure", "status_code":"200"}),mimetype="application/json",status=200)
                         rA = cursor.fetchone()
                         rA = rA["rating"]
                         LID=ID2
                         if ID2==WID:
                                 LID=ID1
+                        cursor.execute("UPDATE profile SET points = points+1 WHERE firebase_id = '{}'".format(WID))
+                        connection.commit()
                         cursor.execute("SELECT rating FROM profile WHERE firebase_id = '{}'".format(LID))
-                        if cursor.rowcount==0:
-                                return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
                         rB = cursor.fetchone()
                         rB = rB["rating"]
                         rA,rB = ELO_Change(rA,rB)
                         query = "UPDATE profile SET rating = {} WHERE firebase_id = '{}'".format(round(rA),WID)
                         cursor.execute(query)
                         connection.commit()
-                        if cursor.rowcount == 0:
-                                return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
                         query = "UPDATE profile SET rating = {} WHERE firebase_id = '{}'".format(round(rB),LID)
                         cursor.execute(query)
                         connection.commit()
-                        if cursor.rowcount == 0:
-                                return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
-                        # insertion to queue table
-                        if cursor.rowcount == 0:
-                                return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
                         return Response(json.dumps({"status": "success", "status_code": "200"}),mimetype="application/json",status=200)

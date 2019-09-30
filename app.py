@@ -43,11 +43,11 @@ def postwall(rollno,imageurl):
 
 @app.route('/User', methods=['POST'])
 def addUser():
-    # try:
+    try:
         fbID = request.form.get('firebase_id')
         cursor.execute("SELECT firebase_id FROM profile WHERE firebase_id = '{}'".format(fbID))
         if cursor.rowcount != 0:
-            return Response(json.dumps({"status": "failure", "reason": "User already exists", "status_code": "400"}), mimetype="application/json",status = 400)
+            return Response(json.dumps({"status": "failure", "reason": "User already exists", "status_code": "200"}), mimetype="application/json",status = 200)
         name = request.form.get('name')
         gender = request.form.get('gender')
         if gender == "MALE":
@@ -60,31 +60,34 @@ def addUser():
         referral = request.form.get('referral_friend')
         imgURL = "0"
         status = request.form.get('face_smash_status')
-        if status != 0:
+        try:
             imgURL = request.form.get('image_url')
+        except:
+            imagURL = "Null"
         cursor.execute("SELECT * FROM profile;")
-        cursor.execute("INSERT into profile VALUES('{FbID}','{roll}','{branch}','{mobile}','{name}',0,{gender},'{url}',1500,'{referral}', '0')".format(FbID=fbID,roll=rollno,branch=branch,mobile=mobile,name=name,gender=gender,url=imgURL,referral = referral))
+        cursor.execute("INSERT into profile VALUES('{FbID}','{roll}','{branch}','{mobile}','{name}',0,{gender},'{url}',1500, 1000,'{referral}', '0')".format(FbID=fbID,roll=rollno,branch=branch,mobile=mobile,name=name,gender=gender,url=imgURL,referral = referral))
         connection.commit()
         return Response(json.dumps({"status": "success", "status_code": "200"}),mimetype = "application/json", status = 200)
-    # except:
-        return Response(json.dumps({"status": "failure", "reason": "Unknown", "status_code": "400"}), mimetype="application/json")
+    except:
+        return Response(json.dumps({"status": "failure", "reason": "Unknown", "status_code": "200"}), mimetype="application/json")
 
 @app.route('/User/<fbID>',methods=["GET"])
 def getUserProfile(fbID):
     cursor.execute("SELECT 'success' AS 'status', '200' AS 'status_code', firebase_id AS firebase_id, rollno AS 'roll_number', branch, mobile, points AS 'candies', referral_friend,name,gender,url AS image_url, face_smash_status FROM profile WHERE firebase_id = '{fbID}'".format(fbID=fbID))
     if cursor.rowcount == 0:
-            return Response(json.dumps({"status":"failure","status_code":"400"}), mimetype="application/json",status = 400)
+            return Response(json.dumps({"status":"failure","status_code":"200"}), mimetype="application/json",status = 200)
     data = cursor.fetchone()
     return Response(json.dumps(data),mimetype="application/json",status =200)
 
 @app.route('/User/Update', methods = ["POST"])
 def updateUser():
     fbID = request.form.get("firebase_id")
-    if fbID == None :
-        return Response(json.dumps({"status": "failure", "status_code": "400"}),mimetype="application/json",status=400)
-    imgURL = request.form.get("image_url")
-    cursor.execute("UPDATE profile SET url = '{}', face_smash_status = 1 WHERE firebase_id ='{}'".format(imgURL,fbID))
-    connection.commit()
+    try:
+        imgURL = request.form.get("image_url")
+        cursor.execute("UPDATE profile SET url = '{}', face_smash_status = 1 WHERE firebase_id ='{}'".format(imgURL,fbID))
+        connection.commit()
+    except:
+        return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status=200)
     return Response(json.dumps({"status":"success", "status_code":"200"}),mimetype="application/json",status=200)
 
 
@@ -138,11 +141,11 @@ def like():
             connection.commit()
             print(cursor.rowcount)
             if cursor.rowcount == 0:
-                return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json",status=400)
+                return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json",status=200)
             return Response(json.dumps({"status":"success", "status_code":"200"}), mimetype = "application/json", status = 200)
         except:
-            return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json", status=400)
-    return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
+            return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status=200)
+    return Response(json.dumps({"status":"failure", "status_code":"200"}),mimetype="application/json",status=200)
     
 @app.route('/unlike',methods=["POST"])
 def unlike():
@@ -150,7 +153,7 @@ def unlike():
     post_id = request.form["post_id"]
     cursor.execute("SELECT * FROM likes WHERE firebase_id='{}' AND post={}".format(firebase_id,post_id))
     if cursor.rowcount == 0:
-        return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json",status=400)
+        return Response(json.dumps({"status":"failure", "status_code":"200"}),mimetype="application/json",status=200)
     cursor.execute("DELETE FROM likes WHERE firebase_id='{}' AND post={}".format(firebase_id,post_id))
     connection.commit()
     cursor.execute("SELECT firebase_id FROM wall WHERE id = {}".format(post_id))
@@ -173,7 +176,7 @@ def quiz():
     query = "SELECT id,ques,option1,option2,option3,option4 FROM quiz WHERE category={} ORDER BY RAND() LIMIT 10 ".format(category)
     cursor.execute(query)
     if cursor.rowcount == 0:
-            return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype = "application/json",status=400)
+            return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype = "application/json",status=200)
     questions=cursor.fetchall()
     ans = {}
     ans["status"] = "success"
@@ -196,7 +199,7 @@ def club():
     query="SELECT name AS club_name, logo AS image_url, info AS description FROM clubs"
     cursor.execute(query)
     if cursor.rowcount == 0:
-            return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json", status = 400)
+            return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status = 200)
     details=cursor.fetchall()
     ans = {}
     ans["status"] = "success"
@@ -210,7 +213,7 @@ def core():
     query="SELECT name, profile_pic AS image_url, position FROM coreteam"
     cursor.execute(query)
     if cursor.rowcount == 0:
-            return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json", status = 400)
+            return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status = 200)
     core_details=cursor.fetchall()
     ans = {}
     ans["status"]="success"
@@ -223,7 +226,7 @@ def sponsors():
     query="SELECT sponsor_name, sponsor_logo AS image_url, sponsor_info FROM sponsors AS sponsor"
     cursor.execute(query)
     if cursor.rowcount == 0:
-            return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json",status = 400)
+            return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json",status = 200)
     sponsor=cursor.fetchall()
     ans = {}
     ans["status"]="success"
@@ -237,7 +240,7 @@ def leaderboard():
     query="SELECT name AS Name, points AS candies, gender AS Gender FROM profile order by points DESC"
     cursor.execute(query)
     if cursor.rowcount == 0:
-            return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json", status = 400)
+            return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status = 200)
     details=cursor.fetchall()
     ans = {}
     ans["status"]="success"
@@ -245,7 +248,17 @@ def leaderboard():
     ans["leaderboard"]=details
     return Response(json.dumps(ans),mimetype="application/json",status=200)
 
-
+@app.route('/quiz/leaderboard')
+def quizLeaderboard():
+    cursor.execute("SELECT name AS Name, quiz_rating, gender AS Gender FROM profile ORDER BY quiz_rating DESC")
+    if cursor.rowcount == 0:
+        return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status=200)
+    details = cursor.fetchall()
+    ans = {}
+    ans["status"] = "success"
+    ans["status_code"] = "200"
+    ans["leaderboard"] = details
+    return Response(json.dumps(ans), mimetype="application/json", status=200)
 
 @app.route('/feed',methods=['POST'])
 def feed():
@@ -256,7 +269,7 @@ def feed():
         cursor.execute(query)
         connection.commit()
     except:
-        return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype = 'application/json', status = 400)
+        return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype = 'application/json', status = 200)
     return Response(json.dumps({"status": "success", "status_code": "200", }),mimetype = "application/json", status = 200)
 
 @app.route('/feed/<page_index>/<firebase_id>', methods=['GET'])
@@ -269,7 +282,7 @@ def feedg(page_index, firebase_id):
     ret_arr=[]
     cursor.execute(query)
     if cursor.rowcount == 0:
-            return Response(json.dumps({"status": "failure", "status_code": "400"}), mimetype="application/json", status = 400)
+            return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status = 200)
     photos=cursor.fetchall()
     for i in range(0, len(photos)):
         print(photos[i])
@@ -317,7 +330,7 @@ def feedg(page_index, firebase_id):
 @app.route('/schedule', methods = ["GET", "POST"])
 def schedule():
     if request.method == "GET":
-        cursor.execute("SELECT event_id, club_name, event_name, date(time) AS date, time(time) AS time FROM schedule INNER JOIN clubs ON clubs.id = schedule.club_id")
+        cursor.execute("SELECT event_id, club_name, event_name, date(time) AS date, time(time) AS time, venue FROM schedule INNER JOIN clubs ON clubs.id = schedule.club_id ORDER BY time")
         if cursor.rowcount == 0:
             return Response(json.dumps({"status":"failure", "status_code":"200"}),content_type = "application/json", status = 200)
         ans = {}
@@ -337,11 +350,11 @@ def schedule():
             connection.commit()
             return Response(json.dumps({"status": "success", "status_code": "200"}), mimetype = "application/json", status=200)
         except:
-            return Response(json.dumps({"status":"failure","status_code":"400"}),mimetype="application/json", status=  400)
+            return Response(json.dumps({"status":"failure","status_code":"200"}),mimetype="application/json", status=  200)
 
 @app.route("/schedule/<club_name>")
 def ClubSchedule(club_name):
-    cursor.execute("SELECT event_id, club_name, event_name, date(time) AS date, time(time) AS time FROM schedule INNER JOIN clubs ON clubs.id = schedule.club_id where club_name = '{}'".format(club_name))
+    cursor.execute("SELECT event_id, club_name, event_name, date(time) AS date, time(time) AS time, venue FROM schedule INNER JOIN clubs ON clubs.id = schedule.club_id where club_name = '{}' ORDER BY time".format(club_name))
     if cursor.rowcount == 0:
         return Response(json.dumps({"status":"failure", "status_code":"200"}),content_type = "application/json", status = 200)
     ans = {}

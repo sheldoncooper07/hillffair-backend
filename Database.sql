@@ -33,6 +33,7 @@ CREATE TABLE `profile` (
   `gender` tinyint(1) NOT NULL,
   `url` varchar(255) NOT NULL,
   `rating` int(10) NOT NULL DEFAULT 1500,
+  `quiz_rating` int(10) NOT NULL DEFAULT 1000,
   `referral_friend` varchar(100) NOT NULL,
   `face_smash_status` boolean DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
