@@ -9,7 +9,7 @@ def rewards(connection):
         cursor.execute("SELECT points from profile where firebase_id = '{}'".format(fbID))
         candies = cursor.fetchone()
         if cursor.rowcount==0:
-            return Response(json.dumps({"status":"failure", "status_code":"400"}),mimetype="application/json", status = 400)
+            return Response(json.dumps({"status":"failure", "status_code":"200"}),mimetype="application/json", status = 200)
         candies = candies["points"]
         if(int(candies) < int(subCnd)):
             return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status=200)
