@@ -15,8 +15,8 @@ import quiz_answers
 global cursor
 
 connection = pymysql.connect(host='127.0.0.1',
-                                         user='moulik',
-                                         password='bigbang2',
+                                         user='hillffair',
+                                         password='1qaz2wsx',
                                          db='hillffair',
                                          cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
