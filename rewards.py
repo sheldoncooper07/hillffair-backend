@@ -14,5 +14,5 @@ def rewards(connection):
         if(int(candies) < int(subCnd)):
             return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status=200)
         cursor.execute("UPDATE profile SET points = points - {} WHERE firebase_id = '{}'".format(subCnd,fbID))
-        connection.commit()
+        # connection.commit()
         return Response(json.dumps({"status": "success", "status_code": "200"}), mimetype="application/json", status=200)

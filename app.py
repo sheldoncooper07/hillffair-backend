@@ -18,7 +18,8 @@ connection = pymysql.connect(host='127.0.0.1',
                                          user='hillffair',
                                          password='1qaz2wsx',
                                          db='hillffair',
-                                         cursorclass=pymysql.cursors.DictCursor)
+                                         cursorclass=pymysql.cursors.DictCursor,
+                                         autocommit=True)
 cursor = connection.cursor()
 
 
@@ -26,7 +27,7 @@ cursor = connection.cursor()
 def make():
 	query="INSERT INTO sponsor VALUES ('app team','google.com','info')"
 	cursor.execute(query)
-	connection.commit()
+	# connection.commit()
 	return {"status_code":200}
 
 @app.route('/postwall/<rollno>/<imageurl>')
@@ -36,7 +37,7 @@ def postwall(rollno,imageurl):
     imageurl=imageurl
     query = cursor.execute("INSERT into Wall VALUES(NULL,'"+rollno+"','"+imageurl+"', "+str(int(time.time()+19800))+")")
     cursor.execute(query)
-    connection.commit()
+    # connection.commit()
     return {'status': 'success',"status_code":200}
 
 
@@ -65,7 +66,7 @@ def addUser():
             imagURL = "Null"
         cursor.execute("SELECT * FROM profile;")
         cursor.execute("INSERT into profile VALUES('{FbID}','{roll}','{branch}','{mobile}','{name}',0,{gender},'{url}',1500, 1000,'{referral}', '0')".format(FbID=fbID,roll=rollno,branch=branch,mobile=mobile,name=name,gender=gender,url=imgURL,referral = referral))
-        connection.commit()
+        # connection.commit()
         return Response(json.dumps({"status": "success", "status_code": "200"}),mimetype = "application/json", status = 200)
     except:
         return Response(json.dumps({"status": "failure", "reason": "Unknown", "status_code": "200"}), mimetype="application/json")
@@ -105,7 +106,7 @@ def updateUser():
             query += ", branch = '{}'".format(branch)
         query += " WHERE firebase_id = '{}'".format(fbID)
         cursor.execute(query)
-        connection.commit()
+        # connection.commit()
     except:
         return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status=200)
     return Response(json.dumps({"status":"success", "status_code":"200"}),mimetype="application/json",status=200)
@@ -122,7 +123,7 @@ def addUserProfile():
     imgURL = request.form.get('image_url')
     referral = request.form.get('referral_friend')
     cursor.execute("INSERT INTO profile VALUES('{FbID}','{roll}','{branch}','{mobile}','{name}',0,'{gender}','{url}',0,'{referral}')".format(FbID=fbID,roll=rollno,branch=branch,mobile=mobile,name=name,gender=gender,url=imgURL,referral = referral))
-    connection.commit()
+    # connection.commit()
     return {"status_code":200,"status":"success"}
 
 @app.route('/profile/',methods=["GET"])
@@ -148,13 +149,13 @@ def like():
     if cursor.rowcount==0:
         try:
             cursor.execute("INSERT INTO likes VALUES(NULL,{},'{}')".format(post_id,firebase_id))
-            connection.commit()
+            # connection.commit()
             cursor.execute("SELECT firebase_id FROM wall WHERE id={}".format(post_id))
             fbID = cursor.fetchone().get("firebase_id")
             cursor.execute("UPDATE wall SET likes = likes+1 WHERE firebase_id = '{}' AND id = {}".format(firebase_id,post_id))
-            connection.commit()
+            # connection.commit()
             cursor.execute("UPDATE profile SET points=points+1 WHERE firebase_id = '{}'".format(fbID))
-            connection.commit()
+            # connection.commit()
             if cursor.rowcount == 0:
                 return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json",status=200)
             return Response(json.dumps({"status":"success", "status_code":"200"}), mimetype = "application/json", status = 200)
@@ -173,13 +174,13 @@ def unlike():
     if cursor.rowcount == 0:
         return Response(json.dumps({"status":"failure", "status_code":"200"}),mimetype="application/json",status=200)
     cursor.execute("DELETE FROM likes WHERE firebase_id='{}' AND post={}".format(firebase_id,post_id))
-    connection.commit()
+    # connection.commit()
     cursor.execute("SELECT firebase_id FROM wall WHERE id = {}".format(post_id))
     fbID = cursor.fetchone()["firebase_id"]
     cursor.execute("UPDATE profile SET points = points-1 WHERE firebase_id = '{}'".format(fbID))
-    connection.commit()
+    # connection.commit()
     cursor.execute("UPDATE wall SET likes = likes-1 WHERE firebase_id = '{}' AND id = {}".format(firebase_id,post_id))
-    connection.commit()
+    # connection.commit()
     return Response(json.dumps({"status": "success", "status_code": "200"}), mimetype="application/json",status=200)
 
 
@@ -207,7 +208,7 @@ def profile():
     firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url=request.form.firebase_id,request.form.rollno,request.form.branch,request.form.mobile,request.form.referl_friend,request.form.name,request.form.gender,request.form.image_url
     query="INSERT INTO profile VALUES(firebase_id,rollno,branch,mobile,referal_friend,name,gender,image_url)"
     cursor.execute(query)
-    connection.commit()
+    # connection.commit()
     return {"status_code":200}
 
 
@@ -285,7 +286,7 @@ def feed():
     try:
         query="INSERT INTO wall VALUES(Null,'{}',0,'{}')".format(firebase_id,url)
         cursor.execute(query)
-        connection.commit()
+        # connection.commit()
     except:
         return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype = 'application/json', status = 200)
     return Response(json.dumps({"status": "success", "status_code": "200", }),mimetype = "application/json", status = 200)
@@ -363,7 +364,7 @@ def schedule():
         venue = request.form.get("venue")
         try:
             cursor.execute("INSERT INTO schedule VALUES(Null,(SELECT id FROM clubs WHERE name = '{club_name}'), '{club_name}', '{event_name}', '{time}', '{venue}')".format(club_name = club_name, event_name = event_name, time = time, venue = venue))
-            connection.commit()
+            # connection.commit()
             return Response(json.dumps({"status": "success", "status_code": "200"}), mimetype = "application/json", status=200)
         except:
             return Response(json.dumps({"status":"failure","status_code":"200"}),mimetype="application/json", status=  200)

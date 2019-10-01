@@ -64,5 +64,5 @@ def answers(connection):
         rating = rating["quiz_rating"]
         newRating = ratingChange(rating,score)
         cursor.execute("UPDATE profile SET quiz_rating = '{}', points = points + {} WHERE firebase_id = '{}'".format(newRating,score,fbid))
-        connection.commit()
+        # connection.commit()
     return Response(json.dumps({"status": "success", "status_code": "200", "score": score}),mimetype = "application/json",status = 200)
