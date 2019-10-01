@@ -43,15 +43,15 @@ def faceSmash(connection):
                         if ID2==WID:
                                 LID=ID1
                         cursor.execute("UPDATE profile SET points = points+1 WHERE firebase_id = '{}'".format(WID))
-                        connection.commit()
+                        # connection.commit()
                         cursor.execute("SELECT rating FROM profile WHERE firebase_id = '{}'".format(LID))
                         rB = cursor.fetchone()
                         rB = rB["rating"]
                         rA,rB = ELO_Change(rA,rB)
                         query = "UPDATE profile SET rating = {} WHERE firebase_id = '{}'".format(round(rA),WID)
                         cursor.execute(query)
-                        connection.commit()
+                        # connection.commit()
                         query = "UPDATE profile SET rating = {} WHERE firebase_id = '{}'".format(round(rB),LID)
                         cursor.execute(query)
-                        connection.commit()
+                        # connection.commit()
                         return Response(json.dumps({"status": "success", "status_code": "200"}),mimetype="application/json",status=200)
