@@ -34,7 +34,6 @@ def make():
 def postwall(rollno,imageurl):
 
     imageurl=imageurl
-    #print("INSERT into wall VALUES(NULL,'"+rollno+"','"+imageurl+"', "+str(int(time.time()+19800))+")")
     query = cursor.execute("INSERT into Wall VALUES(NULL,'"+rollno+"','"+imageurl+"', "+str(int(time.time()+19800))+")")
     cursor.execute(query)
     connection.commit()
@@ -85,7 +84,24 @@ def updateUser():
     try:
         imgURL = request.form.get("image_url")
         name = request.form.get("name")
-        cursor.execute("UPDATE profile SET url = '{}', name = '{}', face_smash_status = 1 WHERE firebase_id ='{}'".format(imgURL, name,fbID))
+        roll = request.form.get("roll_number")
+        branch = request.form.get("branch")
+        face_smash_status = str(request.form.get("face_smash_status"))
+        if face_smash_status == '1':
+            face_smash_status = 1
+        else:
+            face_smash_status = 0
+        query = "UPDATE profile SET face_smash_status = '{}'".format(face_smash_status)
+        if imgURL != None:
+            query += ",url = '{}'".format(imgURL)
+        if name != None:
+            query += ", name = '{}'".format(name)
+        if roll != None:
+            query+= ", rollno = '{}'".format(roll)
+        if branch != None:
+            query += ", branch = '{}'".format(branch)
+        query += " WHERE firebase_id = '{}'".format(fbID)
+        cursor.execute(query)
         connection.commit()
     except:
         return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status=200)
@@ -102,7 +118,6 @@ def addUserProfile():
     gender = request.form.get('gender')
     imgURL = request.form.get('image_url')
     referral = request.form.get('referral_friend')
-    print("INSERT INTO profile VALUES('{FbID}','{roll}','{branch}','{mobile}','{name}',0,'{gender}','{url}',0,'{referral}')".format(FbID=fbID,roll=rollno,branch=branch,mobile=mobile,name=name,gender=gender,url=imgURL,referral = referral))
     cursor.execute("INSERT INTO profile VALUES('{FbID}','{roll}','{branch}','{mobile}','{name}',0,'{gender}','{url}',0,'{referral}')".format(FbID=fbID,roll=rollno,branch=branch,mobile=mobile,name=name,gender=gender,url=imgURL,referral = referral))
     connection.commit()
     return {"status_code":200,"status":"success"}
@@ -126,21 +141,14 @@ def like():
     cursor.execute(query)
     if cursor.rowcount==0:
         try:
-            print("deb")
             cursor.execute("INSERT INTO likes VALUES(NULL,{},'{}')".format(post_id,firebase_id))
             connection.commit()
             cursor.execute("SELECT firebase_id FROM wall WHERE id={}".format(post_id))
-            print("deb")
             fbID = cursor.fetchone().get("firebase_id")
             cursor.execute("UPDATE wall SET likes = likes+1 WHERE firebase_id = '{}' AND id = {}".format(firebase_id,post_id))
-            print("deb")
             connection.commit()
-            print(
-            	"UPDATE profile SET points=points+1 WHERE firebase_id = '{}'".format(fbID))
             cursor.execute("UPDATE profile SET points=points+1 WHERE firebase_id = '{}'".format(fbID))
-            print("deb")
             connection.commit()
-            print(cursor.rowcount)
             if cursor.rowcount == 0:
                 return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json",status=200)
             return Response(json.dumps({"status":"success", "status_code":"200"}), mimetype = "application/json", status = 200)
@@ -286,7 +294,6 @@ def feedg(page_index, firebase_id):
             return Response(json.dumps({"status": "failure", "status_code": "200"}), mimetype="application/json", status = 200)
     photos=cursor.fetchall()
     for i in range(0, len(photos)):
-        print(photos[i])
         cursor.execute("SELECT * FROM likes WHERE firebase_id= '{}' AND post={}".format(firebase_id,page_index))
         like = 1
         if cursor.rowcount==0:
@@ -314,11 +321,9 @@ def feedg(page_index, firebase_id):
 # def rewards():
 #     firebase_id=request.form.get('firebase_id')
 #     candies=request.form.get('sub_candies')
-#     print(firebase_id,candies)
 #     query = "SELECT points FROM profile WHERE firebase_id = "+ firebase_id
 #     cursor.execute(query)
 #     points = cursor.fetchall()
-#     print(points)
 #     if points>=candies:
 #         query="UPDATE profile SET points = points -"+candies+" WHERE firebase_id="+firebase_id
 #         cursor.execute(query)

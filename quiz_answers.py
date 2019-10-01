@@ -27,19 +27,20 @@ def ratingChange(rating, cAns):
         sgn = -1
     elif cAns-exp == 0:
         sgn = 0
-    print(exp)
     rChange = sgn*(mod(5+cAns-exp)**2)
-    print(rChange)
     return int(rating+rChange)
 
 def answers(connection):
     with connection.cursor() as cursor:
         fbid = request.form.get("firebase_id")
+        cursor.execute("SELECT firebase_id FROM profile WHERE firebase_id = '{}'".format(fbid))
+        if cursor.rowcount == 0:
+            return Response(json.dumps({"status": "failure", "Reason":"Firebase ID doesnot exist", "status_code": "200"}), mimetype="application/json", status=200)
         data = request.form.get("answers")
         try:
             data = javaHashMapStrToJson(data)
         except:
-            return Response(json.dumps({"status":"failure", "status_code":"200"}),mimetype="application/json",status = 200)
+            return Response(json.dumps({"status":"failure", "Reason":"Cant parse answers", "status_code":"200"}),mimetype="application/json",status = 200)
         score = 0
         id = 0
         query = "select * from quiz where id = ".format(data[id]["id"])
@@ -59,6 +60,7 @@ def answers(connection):
             id+=1
         cursor.execute("SELECT quiz_rating FROM profile WHERE firebase_id = '{}'".format(fbid))
         rating = cursor.fetchone()
+        print(rating)
         rating = rating["quiz_rating"]
         newRating = ratingChange(rating,score)
         cursor.execute("UPDATE profile SET quiz_rating = '{}', points = points + {} WHERE firebase_id = '{}'".format(newRating,score,fbid))
