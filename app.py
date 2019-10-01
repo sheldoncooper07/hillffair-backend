@@ -81,6 +81,9 @@ def getUserProfile(fbID):
 @app.route('/User/Update', methods = ["POST"])
 def updateUser():
     fbID = request.form.get("firebase_id")
+    cursor.execute("SELECT firebase_id FROM profile WHERE firebase_id = '{}'".format(fbID))
+    if cursor.rowcount == 0:
+            return Response(json.dumps({"status": "failure", "Reason":"Firebase ID doesnot exist", "status_code": "200"}), mimetype="application/json", status=200)
     try:
         imgURL = request.form.get("image_url")
         name = request.form.get("name")
@@ -135,6 +138,9 @@ def getUser():
 @app.route('/like',methods=['POST'])
 def like():
     firebase_id=request.form['firebase_id']
+    cursor.execute("SELECT firebase_id FROM profile WHERE firebase_id = '{}'".format(firebase_id))
+    if cursor.rowcount == 0:
+        return Response(json.dumps({"status": "failure", "Reason":"Firebase ID doesnot exist", "status_code": "200"}), mimetype="application/json", status=200)
     post_id=request.form['post_id']
 
     query = "SELECT * FROM likes WHERE firebase_id='{}' AND post={}".format(firebase_id, post_id)
@@ -159,6 +165,9 @@ def like():
 @app.route('/unlike',methods=["POST"])
 def unlike():
     firebase_id = request.form["firebase_id"]
+    cursor.execute("SELECT firebase_id FROM profile WHERE firebase_id = '{}'".format(firebase_id))
+    if cursor.rowcount == 0:
+            return Response(json.dumps({"status": "failure", "Reason":"Firebase ID doesnot exist", "status_code": "200"}), mimetype="application/json", status=200)
     post_id = request.form["post_id"]
     cursor.execute("SELECT * FROM likes WHERE firebase_id='{}' AND post={}".format(firebase_id,post_id))
     if cursor.rowcount == 0:
@@ -336,7 +345,7 @@ def feedg(page_index, firebase_id):
 @app.route('/schedule', methods = ["GET", "POST"])
 def schedule():
     if request.method == "GET":
-        cursor.execute("SELECT event_id, club_name, event_name, date(time) AS date, time(time) AS time, venue FROM schedule INNER JOIN clubs ON clubs.id = schedule.club_id ORDER BY time")
+        cursor.execute("SELECT event_id, club_name, event_name, date(time) AS date, time(time) AS time, venue FROM schedule INNER JOIN clubs ON clubs.id = schedule.club_id WHERE TIMESTAMPDIFF(HOUR,CURRENT_TIMESTAMP,time) <= 24 AND TIMESTAMPDIFF(HOUR,CURRENT_TIMESTAMP,time) >=0 ORDER BY time")
         if cursor.rowcount == 0:
             return Response(json.dumps({"status":"failure", "status_code":"200"}),content_type = "application/json", status = 200)
         ans = {}
